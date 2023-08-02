@@ -20,6 +20,7 @@ dependencies = [
  "async-graphql-axum",
  "axum",
  "hyper",
+ "slab",
  "tokio",
 ]
 
