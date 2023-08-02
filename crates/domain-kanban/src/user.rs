@@ -1,8 +1,3 @@
-use std::fmt::Debug as DebugTrait;
-use std::str::FromStr;
-
-use ulid::Ulid;
-
 use crate::Identifier;
 
 #[derive(Debug)]
@@ -28,34 +23,6 @@ impl User {
 }
 
 type UserId = Identifier<User>;
-// pub struct UserId(Ulid);
-//
-// impl UserId {
-//     pub fn new() -> Self {
-//         Self(Ulid::new())
-//     }
-// }
-//
-// impl From<Ulid> for UserId {
-//     fn from(value: Ulid) -> Self {
-//         Self(value)
-//     }
-// }
-//
-// impl DebugTrait for UserId {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         f.debug_tuple("UserId").field(&self.0.to_string()).finish()
-//     }
-// }
-//
-// impl FromStr for UserId {
-//     type Err = <Ulid as FromStr>::Err;
-//
-//     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         let value = Ulid::from_str(s)?;
-//         Ok(UserId(value))
-//     }
-// }
 
 #[derive(Debug)]
 pub struct UserName(String);

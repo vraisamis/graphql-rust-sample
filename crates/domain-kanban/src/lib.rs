@@ -5,9 +5,9 @@ use std::str::FromStr;
 
 use ulid::Ulid;
 
-mod board;
-mod column;
-mod user;
+pub mod board;
+pub mod column;
+pub mod user;
 
 pub struct Identifier<T> {
     value: Ulid,
@@ -32,7 +32,7 @@ impl<T> DebugTrait for Identifier<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // NOTE: Identifier<T> になってしまう
         // f.debug_tuple(type_name::<Self>())
-        f.debug_tuple("Identifier")
+        f.debug_tuple(&format!("Identifier<{}>", type_name::<T>()))
             .field(&self.value.to_string())
             .finish()
     }
