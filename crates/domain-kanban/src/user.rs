@@ -22,7 +22,7 @@ impl User {
     }
 }
 
-type UserId = Identifier<User>;
+pub type UserId = Identifier<User>;
 
 #[derive(Debug)]
 pub struct UserName(String);
@@ -38,9 +38,28 @@ pub struct Email(String);
 
 impl From<String> for Email {
     fn from(value: String) -> Self {
-        Self(value)
+        let v = Self(value);
+        // v.stisfy_invariants().unwrap()
+        v
     }
 }
+
+// TODO
+// impl ModelInvariants for Email {
+//     fn invariants() -> Vec<&'static Invariant<Self>> {
+//         vec![&invariant::length_not_zero]
+//     }
+// }
+//
+// mod invariant {
+//     use crate::InvariantResult;
+//
+//     use super::Email;
+//
+//     pub fn length_not_zero(email: Email) -> InvariantResult<Email> {
+//         Ok(email)
+//     }
+// }
 
 #[cfg(test)]
 mod tests {

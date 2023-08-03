@@ -1,13 +1,17 @@
 use std::any::type_name;
+use std::error::Error as StdError;
 use std::fmt::Debug as DebugTrait;
 use std::marker::PhantomData;
 use std::str::FromStr;
 
+use thiserror::Error;
 use ulid::Ulid;
 
 pub mod board;
 pub mod column;
 pub mod user;
+
+// TODO: Entityの一意性についてかんがえる
 
 pub struct Identifier<T> {
     value: Ulid,
@@ -45,4 +49,27 @@ impl<T> FromStr for Identifier<T> {
         let value = Ulid::from_str(s)?;
         Ok(Self::from(value))
     }
+}
+
+// trait ModelInvariants
+// where
+//     Self: 'static + Sized,
+// {
+//     fn invariants() -> Vec<&'static Invariant<Self>>;
+//     fn stisfy_invariants(self) -> InvariantResult<Self> {
+//         let invariants = Self::invariants();
+//         let init: Result<_, InvariantError> = Ok(self);
+//         invariants
+//             .iter()
+//             .fold(init, |result, func| result.and_then(|v| func(v)))
+//     }
+// }
+//
+// type InvariantResult<T> = Result<T, InvariantError>;
+// type Invariant<T> = dyn Fn(T) -> InvariantResult<T>;
+
+#[derive(Debug, Error)]
+pub enum InvariantError {
+    #[error("不変条件違反: {0}")]
+    ViolationError(String),
 }
