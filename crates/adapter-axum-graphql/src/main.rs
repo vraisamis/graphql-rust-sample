@@ -8,17 +8,27 @@ use axum::{
     routing::get,
     Router, Server,
 };
-use model::starwars::{QueryRoot, StarWars, StarWarsSchema};
+use model::{
+    kanban::{simple::KanbanSchema as SimpleSchema, SchemaWithStaticData},
+    starwars::{QueryRoot, StarWars, StarWarsSchema},
+};
 
-async fn graphql_handler(
+async fn starwars_graphql_handler(
     schema: Extension<StarWarsSchema>,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
 }
 
-async fn graphiql() -> impl IntoResponse {
-    response::Html(GraphiQLSource::build().endpoint("/").finish())
+async fn kanban_graphql_handler(
+    schema: Extension<SimpleSchema>,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    schema.execute(req.into_inner()).await.into()
+}
+
+async fn graphiql(endpoint: &str) -> impl IntoResponse {
+    response::Html(GraphiQLSource::build().endpoint(endpoint).finish())
 }
 
 #[tokio::main]
@@ -26,10 +36,16 @@ async fn main() {
     let schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription)
         .data(StarWars::new())
         .finish();
+    let kanban_schema = SimpleSchema::schema_with_static_data();
 
     let app = Router::new()
-        .route("/", get(graphiql).post(graphql_handler))
-        .layer(Extension(schema));
+        .route(
+            "/starwars",
+            get(|| graphiql("/starwars")).post(starwars_graphql_handler),
+        )
+        .route("/", get(|| graphiql("/")).post(kanban_graphql_handler))
+        .layer(Extension(schema))
+        .layer(Extension(kanban_schema));
 
     println!("GraphiQL IDE: http://localhost:8000");
 

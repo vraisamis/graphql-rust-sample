@@ -1,2 +1,2 @@
-mod kanban;
+pub mod kanban;
 pub mod starwars;
