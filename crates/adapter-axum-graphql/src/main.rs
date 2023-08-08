@@ -10,8 +10,8 @@ use axum::{
 };
 use model::{
     kanban::{
-        simple::KanbanSchema as SimpleSchema, validate::KanbanSchema as ValidateSchema,
-        SchemaWithStaticData,
+        simple::KanbanSchema as SimpleSchema, storage::KanbanSchema as storageSchema,
+        validate::KanbanSchema as ValidateSchema, SchemaWithStaticData,
     },
     starwars::{QueryRoot, StarWars, StarWarsSchema},
 };
@@ -37,17 +37,26 @@ async fn kanban_validate_graphql_handler(
     schema.execute(req.into_inner()).await.into()
 }
 
+async fn kanban_storage_graphql_handler(
+    schema: Extension<storageSchema>,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    schema.execute(req.into_inner()).await.into()
+}
+
 async fn graphiql(endpoint: &str) -> impl IntoResponse {
     response::Html(GraphiQLSource::build().endpoint(endpoint).finish())
 }
 
 #[tokio::main]
 async fn main() {
+    logger_init();
     let schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription)
         .data(StarWars::new())
         .finish();
     let kanban_schema = SimpleSchema::schema_with_static_data();
     let validate_schema = ValidateSchema::schema_with_static_data();
+    let storage_schema = storageSchema::schema_with_static_data();
 
     let app = Router::new()
         .route(
@@ -59,9 +68,14 @@ async fn main() {
             "/v",
             get(|| graphiql("/v")).post(kanban_validate_graphql_handler),
         )
+        .route(
+            "/s",
+            get(|| graphiql("/s")).post(kanban_storage_graphql_handler),
+        )
         .layer(Extension(schema))
         .layer(Extension(kanban_schema))
-        .layer(Extension(validate_schema));
+        .layer(Extension(validate_schema))
+        .layer(Extension(storage_schema));
 
     println!("GraphiQL IDE: http://localhost:8000");
 
@@ -69,4 +83,9 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+fn logger_init() {
+    // install global collector configured based on RUST_LOG env var.
+    tracing_subscriber::fmt::init();
 }

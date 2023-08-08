@@ -2,10 +2,13 @@ use std::any::Any;
 
 use async_graphql::{ObjectType, Schema, SubscriptionType};
 
+// V1
 pub mod simple;
+// V2
 pub mod validate;
-// TODO
-// pub mod federation;
+// V3
+pub mod storage;
+// TODO V4
 // pub mod dataloader;
 
 pub trait SchemaWithStaticData<T, Query, Mutation, Subscription>
