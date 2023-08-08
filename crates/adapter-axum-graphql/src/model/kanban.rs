@@ -3,6 +3,10 @@ use std::any::Any;
 use async_graphql::{ObjectType, Schema, SubscriptionType};
 
 pub mod simple;
+pub mod validate;
+// TODO
+// pub mod federation;
+// pub mod dataloader;
 
 pub trait SchemaWithStaticData<T, Query, Mutation, Subscription>
 where
