@@ -26,79 +26,67 @@ impl SchemaWithStaticData<Data, QueryRoot, EmptyMutation, EmptySubscription> for
             User::new("u1", "bbb", "bbb@example.com", vec!["b1"]),
             User::new("u2", "ccc", "ccc@example.com", Vec::<String>::new()),
         ];
+        let columns = vec![
+            Column::new(
+                "o0",
+                "TODO",
+                vec![
+                    Card::new("c0", "掃除", ""),
+                    Card::new("c1", "洗濯", ""),
+                    Card::new("c2", "食事", ""),
+                ],
+            ),
+            Column::new("o1", "doing", vec![Card::new("c3", "ゴミ出し", "")]),
+            Column::new(
+                "o2",
+                "DONE",
+                vec![
+                    Card::new("c14", "買い物", ""),
+                    Card::new("c15", "洗い物", ""),
+                ],
+            ),
+            Column::new(
+                "o3",
+                "wish",
+                vec![
+                    Card::new("c4", "ランタン", ""),
+                    Card::new("c5", "本棚", "いろいろ"),
+                ],
+            ),
+            Column::new(
+                "o4",
+                "bought",
+                vec![
+                    Card::new("c13", "石鹸", ""),
+                    Card::new("c12", "常備薬", ""),
+                    Card::new("c11", "米", ""),
+                    Card::new("c9", "センサーライト", ""),
+                    Card::new("c10", "飲み物", ""),
+                ],
+            ),
+            Column::new("o5", "pending", vec![]),
+            Column::new(
+                "o6",
+                "challenge",
+                vec![
+                    Card::new("c8", "ゴハッチュウ", ""),
+                    Card::new("c7", "ダソッキー", ""),
+                    Card::new("c6", "床下三兄弟", ""),
+                ],
+            ),
+            Column::new("o7", "got", vec![]),
+        ];
         let boards = vec![
-            Board::new(
-                "b0",
-                "yarukoto",
-                users[0].clone(),
-                vec![
-                    Column::new(
-                        "o0",
-                        "TODO",
-                        vec![
-                            Card::new("c0", "掃除", ""),
-                            Card::new("c1", "洗濯", ""),
-                            Card::new("c2", "食事", ""),
-                        ],
-                    ),
-                    Column::new("o1", "doing", vec![Card::new("c3", "ゴミ出し", "")]),
-                    Column::new(
-                        "o2",
-                        "DONE",
-                        vec![
-                            Card::new("c14", "買い物", ""),
-                            Card::new("c15", "洗い物", ""),
-                        ],
-                    ),
-                ],
-            ),
-            Board::new(
-                "b1",
-                "wishlist",
-                users[1].clone(),
-                vec![
-                    Column::new(
-                        "o3",
-                        "wish",
-                        vec![
-                            Card::new("c4", "ランタン", ""),
-                            Card::new("c5", "本棚", "いろいろ"),
-                        ],
-                    ),
-                    Column::new(
-                        "o4",
-                        "bought",
-                        vec![
-                            Card::new("c13", "石鹸", ""),
-                            Card::new("c12", "常備薬", ""),
-                            Card::new("c11", "米", ""),
-                            Card::new("c9", "センサーライト", ""),
-                            Card::new("c10", "飲み物", ""),
-                        ],
-                    ),
-                    Column::new("o5", "pending", vec![]),
-                ],
-            ),
-            Board::new(
-                "b2",
-                "monster",
-                users[0].clone(),
-                vec![
-                    Column::new(
-                        "o6",
-                        "challenge",
-                        vec![
-                            Card::new("c8", "ゴハッチュウ", ""),
-                            Card::new("c7", "ダソッキー", ""),
-                            Card::new("c6", "床下三兄弟", ""),
-                        ],
-                    ),
-                    Column::new("o7", "got", vec![]),
-                ],
-            ),
+            Board::new("b0", "yarukoto", "u0", vec!["o0", "o1", "o2"]),
+            Board::new("b1", "wishlist", "u1", vec!["o3", "o4", "o5"]),
+            Board::new("b2", "monster", "u0", vec!["o6", "o7"]),
         ];
 
-        Data { users, boards }
+        Data {
+            users,
+            boards,
+            columns,
+        }
     }
 
     fn schema_with_static_data() -> Schema<QueryRoot, EmptyMutation, EmptySubscription> {
@@ -115,6 +103,7 @@ impl SchemaWithStaticData<Data, QueryRoot, EmptyMutation, EmptySubscription> for
 pub struct Data {
     users: Vec<User>,
     boards: Vec<Board>,
+    columns: Vec<Column>,
 }
 
 pub struct QueryRoot;
@@ -161,10 +150,8 @@ impl QueryRoot {
     ) -> GqlResult<Option<Column>> {
         let result = ctx
             .data::<Data>()?
-            .boards
+            .columns
             .iter()
-            .map(|b| &b.columns)
-            .flatten()
             .filter(|c| c.id == id)
             .next();
         Ok(result.cloned())
@@ -173,10 +160,8 @@ impl QueryRoot {
     async fn get_card<'a>(&self, ctx: &Context<'a>, id: String) -> GqlResult<Option<Card>> {
         let result = ctx
             .data::<Data>()?
-            .boards
+            .columns
             .iter()
-            .map(|b| &b.columns)
-            .flatten()
             .map(|c| &c.cards)
             .flatten()
             .filter(|c| c.id == id)
@@ -239,23 +224,23 @@ pub struct Board {
     id: String,
     title: String,
     #[graphql(skip)]
-    owner: User,
+    owner_id: String,
     #[graphql(skip)]
-    columns: Vec<Column>,
+    column_ids: Vec<String>,
 }
 
 impl Board {
     fn new(
         id: impl Into<String>,
         title: impl Into<String>,
-        owner: User,
-        columns: Vec<Column>,
+        owner_id: impl Into<String>,
+        column_ids: Vec<impl Into<String>>,
     ) -> Self {
         Self {
             id: id.into(),
             title: title.into(),
-            owner,
-            columns,
+            owner_id: owner_id.into(),
+            column_ids: column_ids.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -264,12 +249,26 @@ impl Board {
 impl Board {
     async fn owner<'a>(&self, ctx: &Context<'a>) -> GqlResult<User> {
         println!("CALLED Resolver: Board.owner()");
-        Ok(self.owner.clone())
+        let result = ctx
+            .data::<Data>()?
+            .users
+            .iter()
+            .filter(|u| u.id == self.owner_id)
+            .map(Clone::clone)
+            .next();
+        result.ok_or(GqlError::new("user not found"))
     }
 
     async fn columns<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<Column>> {
         println!("CALLED Resolver: Board.columns()");
-        Ok(self.columns.clone())
+        let result = ctx
+            .data::<Data>()?
+            .columns
+            .iter()
+            .filter(|c| self.column_ids.contains(&c.id))
+            .map(Clone::clone)
+            .collect();
+        Ok(result)
     }
 }
 
