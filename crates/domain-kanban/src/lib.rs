@@ -1,5 +1,5 @@
 use std::any::type_name;
-use std::error::Error as StdError;
+
 use std::fmt::Debug as DebugTrait;
 use std::marker::PhantomData;
 use std::str::FromStr;

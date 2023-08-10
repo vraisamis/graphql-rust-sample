@@ -1,5 +1,5 @@
 use async_graphql::{
-    ComplexObject, Context, EmptyMutation, EmptySubscription, Error as GqlError, Object, Pos,
+    ComplexObject, Context, EmptyMutation, EmptySubscription, Object,
     Result as GqlResult, Schema, SimpleObject,
 };
 
@@ -126,7 +126,7 @@ impl QueryRoot {
         vec![u1]
     }
 
-    async fn test_user<'a>(&self, ctx: &Context<'a>, id: String) -> User {
+    async fn test_user<'a>(&self, _ctx: &Context<'a>, _id: String) -> User {
         let u1 = User {
             id: "foo".into(),
             name: "bar".into(),
