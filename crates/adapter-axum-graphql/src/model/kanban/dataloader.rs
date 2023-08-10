@@ -1,6 +1,8 @@
+use std::marker::PhantomData;
+
 use async_graphql::{
     extensions, ComplexObject, Context, EmptyMutation, EmptySubscription, Error as GqlError,
-    Object, Result as GqlResult, Schema, SimpleObject,
+    InputValueError, Object, Result as GqlResult, Scalar, ScalarType, Schema, SimpleObject, Value,
 };
 
 use super::SchemaWithStaticData;
@@ -96,9 +98,6 @@ impl SchemaWithStaticData<Data, QueryRoot, EmptyMutation, EmptySubscription> for
             .finish()
     }
 }
-// pub fn schema() -> KanbanSchema {
-//     Schema::build(QueryRoot, EmptyMutation, EmptySubscription).finish()
-// }
 
 pub struct Data {
     users: Vec<User>,
@@ -113,7 +112,7 @@ impl QueryRoot {
     async fn get_user<'a>(
         &self,
         ctx: &Context<'a>,
-        #[graphql(validator(custom = "validator::UserIdValidator"))] id: String,
+        #[graphql(validator(custom = "validator::UserIdValidator"))] id: Id<User>,
     ) -> GqlResult<Option<User>> {
         let result = ctx
             .data::<Data>()?
@@ -132,7 +131,9 @@ impl QueryRoot {
     async fn get_board<'a>(
         &self,
         ctx: &Context<'a>,
-        #[graphql(validator(custom = "validator::IdValidator::new(\"Board\", \"b\")"))] id: String,
+        #[graphql(validator(custom = "validator::IdValidator::new(\"Board\", \"b\")"))] id: Id<
+            Board,
+        >,
     ) -> GqlResult<Option<Board>> {
         let result = ctx
             .data::<Data>()?
@@ -146,7 +147,8 @@ impl QueryRoot {
     async fn get_column<'a>(
         &self,
         ctx: &Context<'a>,
-        #[graphql(validator(custom = "validator::IdValidator::new(\"Column\", \"o\")"))] id: String,
+        // #[graphql(validator(custom = "validator::IdValidator::new(\"Column\", \"o\")"))] id: String,
+        id: String,
     ) -> GqlResult<Option<Column>> {
         let result = ctx
             .data::<Data>()?
@@ -170,23 +172,66 @@ impl QueryRoot {
     }
 }
 
+// DataloaderするのにIDの型が個別のほうが嬉しい
+#[derive(Debug, Clone, Eq)]
+pub struct Id<T> {
+    value: String,
+    _phantom: PhantomData<T>,
+}
+impl<T> PartialEq for Id<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value && self._phantom == other._phantom
+    }
+}
+
+#[Scalar]
+impl<T: Send + Sync> ScalarType for Id<T> {
+    fn parse(value: Value) -> async_graphql::InputValueResult<Self> {
+        if let Value::String(value) = value {
+            Ok(Self {
+                value,
+                _phantom: PhantomData,
+            })
+        } else {
+            Err(InputValueError::expected_type(value))
+        }
+    }
+
+    fn to_value(&self) -> Value {
+        let v: &str = &self.value;
+        Value::from(v)
+    }
+}
+
+impl<T, U> From<U> for Id<T>
+where
+    U: Into<String>,
+{
+    fn from(value: U) -> Self {
+        Self {
+            value: value.into(),
+            _phantom: PhantomData,
+        }
+    }
+}
+
 // SimpleObjectならフィールドがそのままgraphqlにでていく
 #[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex)]
 pub struct User {
-    id: String,
+    id: Id<User>,
     name: String,
     email: String,
     #[graphql(skip)]
-    owned_board_ids: Vec<String>,
+    owned_board_ids: Vec<Id<Board>>,
 }
 
 impl User {
     fn new(
-        id: impl Into<String>,
+        id: impl Into<Id<User>>,
         name: impl Into<String>,
         email: impl Into<String>,
-        owned_board_ids: Vec<impl Into<String>>,
+        owned_board_ids: Vec<impl Into<Id<Board>>>,
     ) -> Self {
         Self {
             id: id.into(),
@@ -221,7 +266,7 @@ impl User {
 #[derive(Debug, Clone, SimpleObject)]
 #[graphql(complex)]
 pub struct Board {
-    id: String,
+    id: Id<Board>,
     title: String,
     #[graphql(skip)]
     owner_id: String,
@@ -231,7 +276,7 @@ pub struct Board {
 
 impl Board {
     fn new(
-        id: impl Into<String>,
+        id: impl Into<Id<Board>>,
         title: impl Into<String>,
         owner_id: impl Into<String>,
         column_ids: Vec<impl Into<String>>,
@@ -253,7 +298,7 @@ impl Board {
             .data::<Data>()?
             .users
             .iter()
-            .filter(|u| u.id == self.owner_id)
+            .filter(|u| u.id.value == self.owner_id)
             .map(Clone::clone)
             .next();
         result.ok_or(GqlError::new("user not found"))
@@ -311,12 +356,14 @@ impl Card {
 }
 
 mod validator {
+    use super::*;
     use async_graphql::{CustomValidator, InputValueError};
 
     pub struct UserIdValidator;
-    impl CustomValidator<String> for UserIdValidator {
-        fn check(&self, value: &String) -> Result<(), async_graphql::InputValueError<String>> {
+    impl CustomValidator<Id<User>> for UserIdValidator {
+        fn check(&self, value: &Id<User>) -> Result<(), async_graphql::InputValueError<Id<User>>> {
             value
+                .value
                 .starts_with("u")
                 .then_some(())
                 .ok_or(InputValueError::custom(
@@ -338,9 +385,13 @@ mod validator {
         }
     }
 
-    impl CustomValidator<String> for IdValidator {
-        fn check(&self, value: &String) -> Result<(), async_graphql::InputValueError<String>> {
+    impl<T> CustomValidator<Id<T>> for IdValidator
+    where
+        T: Send + Sync,
+    {
+        fn check(&self, value: &Id<T>) -> Result<(), async_graphql::InputValueError<Id<T>>> {
             value
+                .value
                 .starts_with(&self.start)
                 .then_some(())
                 .ok_or(InputValueError::custom(format!(

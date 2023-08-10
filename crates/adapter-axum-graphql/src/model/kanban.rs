@@ -8,8 +8,8 @@ pub mod simple;
 pub mod validate;
 // V3
 pub mod storage;
-// TODO V4
-// pub mod dataloader;
+// V4
+pub mod dataloader;
 
 pub trait SchemaWithStaticData<T, Query, Mutation, Subscription>
 where

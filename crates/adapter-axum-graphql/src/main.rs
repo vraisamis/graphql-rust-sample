@@ -1,6 +1,6 @@
 mod model;
 
-use async_graphql::{http::GraphiQLSource, EmptyMutation, EmptySubscription, Schema};
+use async_graphql::{http::GraphiQLSource, Data, EmptyMutation, EmptySubscription, Schema};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
     extract::Extension,
@@ -10,8 +10,9 @@ use axum::{
 };
 use model::{
     kanban::{
-        simple::KanbanSchema as SimpleSchema, storage::KanbanSchema as storageSchema,
-        validate::KanbanSchema as ValidateSchema, SchemaWithStaticData,
+        dataloader::KanbanSchema as DataLoaderSchema, simple::KanbanSchema as SimpleSchema,
+        storage::KanbanSchema as StorageSchema, validate::KanbanSchema as ValidateSchema,
+        SchemaWithStaticData,
     },
     starwars::{QueryRoot, StarWars, StarWarsSchema},
 };
@@ -38,7 +39,14 @@ async fn kanban_validate_graphql_handler(
 }
 
 async fn kanban_storage_graphql_handler(
-    schema: Extension<storageSchema>,
+    schema: Extension<StorageSchema>,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    schema.execute(req.into_inner()).await.into()
+}
+
+async fn kanban_dataloader_graphql_handler(
+    schema: Extension<StorageSchema>,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
@@ -56,7 +64,8 @@ async fn main() {
         .finish();
     let kanban_schema = SimpleSchema::schema_with_static_data();
     let validate_schema = ValidateSchema::schema_with_static_data();
-    let storage_schema = storageSchema::schema_with_static_data();
+    let storage_schema = StorageSchema::schema_with_static_data();
+    let datalader_schema = DataLoaderSchema::schema_with_static_data();
 
     let app = Router::new()
         .route(
@@ -72,10 +81,15 @@ async fn main() {
             "/s",
             get(|| graphiql("/s")).post(kanban_storage_graphql_handler),
         )
+        .route(
+            "/d",
+            get(|| graphiql("/d")).post(kanban_dataloader_graphql_handler),
+        )
         .layer(Extension(schema))
         .layer(Extension(kanban_schema))
         .layer(Extension(validate_schema))
-        .layer(Extension(storage_schema));
+        .layer(Extension(storage_schema))
+        .layer(Extension(datalader_schema));
 
     println!("GraphiQL IDE: http://localhost:8000");
 
