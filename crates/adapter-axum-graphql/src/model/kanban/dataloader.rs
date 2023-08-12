@@ -128,28 +128,19 @@ impl QueryRoot {
             Board,
         >,
     ) -> GqlResult<Option<Board>> {
-        let result = ctx
-            .data::<Data>()?
-            .boards
-            .iter()
-            .filter(|e| e.id == id)
-            .next();
-        Ok(result.cloned())
+        let result = load_one(ctx, id).await?;
+        Ok(result)
     }
 
     async fn get_column<'a>(
         &self,
         ctx: &Context<'a>,
-        // #[graphql(validator(custom = "validator::IdValidator::new(\"Column\", \"o\")"))] id: String,
-        id: String,
+        #[graphql(validator(custom = "validator::IdValidator::new(\"Column\", \"o\")"))] id: Id<
+            Column,
+        >,
     ) -> GqlResult<Option<Column>> {
-        let result = ctx
-            .data::<Data>()?
-            .columns
-            .iter()
-            .filter(|c| c.id == id)
-            .next();
-        Ok(result.cloned())
+        let result = load_one(ctx, id).await?;
+        Ok(result)
     }
 
     async fn get_card<'a>(&self, ctx: &Context<'a>, id: String) -> GqlResult<Option<Card>> {
@@ -259,17 +250,17 @@ pub struct Board {
     id: Id<Board>,
     title: String,
     #[graphql(skip)]
-    owner_id: String,
+    owner_id: Id<User>,
     #[graphql(skip)]
-    column_ids: Vec<String>,
+    column_ids: Vec<Id<Column>>,
 }
 
 impl Board {
     fn new(
         id: impl Into<Id<Board>>,
         title: impl Into<String>,
-        owner_id: impl Into<String>,
-        column_ids: Vec<impl Into<String>>,
+        owner_id: impl Into<Id<User>>,
+        column_ids: Vec<impl Into<Id<Column>>>,
     ) -> Self {
         Self {
             id: id.into(),
@@ -283,39 +274,29 @@ impl Board {
 #[ComplexObject]
 impl Board {
     async fn owner<'a>(&self, ctx: &Context<'a>) -> GqlResult<User> {
-        println!("CALLED Resolver: Board.owner()");
-        let result = ctx
-            .data::<Data>()?
-            .users
-            .iter()
-            .filter(|u| u.id.value == self.owner_id)
-            .map(Clone::clone)
-            .next();
+        println!("CALLED Resolver: Board.owner(): load_one");
+        let result = load_one(ctx, self.owner_id.clone()).await?;
         result.ok_or(GqlError::new("user not found"))
     }
 
     async fn columns<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<Column>> {
-        println!("CALLED Resolver: Board.columns()");
-        let result = ctx
-            .data::<Data>()?
-            .columns
-            .iter()
-            .filter(|c| self.column_ids.contains(&c.id))
-            .map(Clone::clone)
-            .collect();
+        println!("CALLED Resolver: Board.columns(): load_many");
+        // TODO: remove clone
+        let map = load_many(ctx, self.column_ids.clone()).await?;
+        let result = Vec::from_iter(map.into_values().into_iter());
         Ok(result)
     }
 }
 
 #[derive(Debug, Clone, SimpleObject)]
 pub struct Column {
-    id: String,
+    id: Id<Column>,
     title: String,
     cards: Vec<Card>,
 }
 
 impl Column {
-    fn new(id: impl Into<String>, title: impl Into<String>, cards: Vec<Card>) -> Self {
+    fn new(id: impl Into<Id<Column>>, title: impl Into<String>, cards: Vec<Card>) -> Self {
         Self {
             id: id.into(),
             title: title.into(),
