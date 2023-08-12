@@ -1,11 +1,13 @@
-use std::marker::PhantomData;
+mod loaders;
 
+use super::SchemaWithStaticData;
 use async_graphql::{
+    dataloader::{DataLoader, Loader},
     extensions, ComplexObject, Context, EmptyMutation, EmptySubscription, Error as GqlError,
     InputValueError, Object, Result as GqlResult, Scalar, ScalarType, Schema, SimpleObject, Value,
 };
-
-use super::SchemaWithStaticData;
+use loaders::{load_many, load_one};
+use std::{collections::HashMap, hash::Hash, marker::PhantomData};
 
 pub type KanbanSchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
 
@@ -94,6 +96,7 @@ impl SchemaWithStaticData<Data, QueryRoot, EmptyMutation, EmptySubscription> for
     fn schema_with_static_data() -> Schema<QueryRoot, EmptyMutation, EmptySubscription> {
         Schema::build(Self::query(), Self::mutation(), Self::subscription())
             .data(Self::data())
+            .data(DataLoader::new(Self::data(), tokio::spawn))
             .extension(extensions::Logger)
             .finish()
     }
@@ -114,18 +117,8 @@ impl QueryRoot {
         ctx: &Context<'a>,
         #[graphql(validator(custom = "validator::UserIdValidator"))] id: Id<User>,
     ) -> GqlResult<Option<User>> {
-        let result = ctx
-            .data::<Data>()?
-            .users
-            .iter()
-            .filter(|e| e.id == id)
-            .next();
-        Ok(result.cloned())
-        // NOTE: 以下でエラーを返せるが、クエリ自体は成功する。
-        // ctx.add_error(ServerError::new("foobar", Some((1, 1).into())));
-        // Ok(u1)
-        // NOTE: Errorを返すと（全ての）クエリが失敗になる
-        // Err(GqlError::new("hogehoge"))
+        let result = load_one(ctx, id).await?;
+        Ok(result)
     }
 
     async fn get_board<'a>(
@@ -173,7 +166,7 @@ impl QueryRoot {
 }
 
 // DataloaderするのにIDの型が個別のほうが嬉しい
-#[derive(Debug, Clone, Eq)]
+#[derive(Debug, Clone)]
 pub struct Id<T> {
     value: String,
     _phantom: PhantomData<T>,
@@ -181,6 +174,13 @@ pub struct Id<T> {
 impl<T> PartialEq for Id<T> {
     fn eq(&self, other: &Self) -> bool {
         self.value == other.value && self._phantom == other._phantom
+    }
+}
+impl<T> Eq for Id<T> {}
+impl<T> Hash for Id<T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.value.hash(state);
+        self._phantom.hash(state);
     }
 }
 
