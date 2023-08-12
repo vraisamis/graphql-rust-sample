@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::{column::ColumnId, user::UserId, Identifier};
 
 pub struct Board {

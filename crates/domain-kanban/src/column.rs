@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::Identifier;
 
 pub struct Column {
