@@ -46,7 +46,7 @@ async fn kanban_storage_graphql_handler(
 }
 
 async fn kanban_dataloader_graphql_handler(
-    schema: Extension<StorageSchema>,
+    schema: Extension<DataLoaderSchema>,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
     schema.execute(req.into_inner()).await.into()
