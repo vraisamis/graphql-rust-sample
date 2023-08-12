@@ -245,20 +245,10 @@ impl User {
 #[ComplexObject]
 impl User {
     async fn owned_boards<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<Board>> {
-        println!("CALLED Resolver: User.owned_boards()");
-        let ids = &self.owned_board_ids;
-        let result = ctx
-            .data::<Data>()?
-            .boards
-            .iter()
-            .filter_map(|b| {
-                if ids.contains(&b.id) {
-                    Some(b.clone())
-                } else {
-                    None
-                }
-            })
-            .collect();
+        println!("CALLED Resolver: User.owned_boards(): load_many");
+        // TODO: remove clone
+        let map = load_many(ctx, self.owned_board_ids.clone()).await?;
+        let result = Vec::from_iter(map.into_values().into_iter());
         Ok(result)
     }
 }

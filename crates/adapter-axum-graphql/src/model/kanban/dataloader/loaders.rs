@@ -1,4 +1,4 @@
-use super::{Data, Id, User};
+use super::{Board, Data, Id, User};
 use anyhow::Result as AResult;
 use async_graphql::{
     dataloader::{DataLoader, Loader},
@@ -44,7 +44,6 @@ impl Loader<Id<User>> for Data {
     type Error = String;
 
     async fn load(&self, keys: &[Id<User>]) -> Result<HashMap<Id<User>, Self::Value>, Self::Error> {
-        // 出力されない、メインスレッドではないから？
         println!(
             "[Dataloader] CALLED DataLoader of Id<User> -> User: {:?}",
             keys
@@ -55,6 +54,34 @@ impl Loader<Id<User>> for Data {
             .filter_map(|u| {
                 if keys.contains(&u.id) {
                     Some((u.id.clone(), u.clone()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        Ok(result)
+    }
+}
+
+#[async_trait]
+impl Loader<Id<Board>> for Data {
+    type Value = Board;
+    type Error = String;
+
+    async fn load(
+        &self,
+        keys: &[Id<Board>],
+    ) -> Result<HashMap<Id<Board>, Self::Value>, Self::Error> {
+        println!(
+            "[Dataloader] CALLED DataLoader of Id<Board> -> Board: {:?}",
+            keys
+        );
+        let result: HashMap<Id<Board>, Board> = self
+            .boards
+            .iter()
+            .filter_map(|b| {
+                if keys.contains(&b.id) {
+                    Some((b.id.clone(), b.clone()))
                 } else {
                     None
                 }
