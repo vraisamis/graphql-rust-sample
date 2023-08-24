@@ -2,12 +2,12 @@ mod loaders;
 
 use super::SchemaWithStaticData;
 use async_graphql::{
-    dataloader::{DataLoader, Loader},
-    extensions, ComplexObject, Context, EmptyMutation, EmptySubscription, Error as GqlError,
-    InputValueError, Object, Result as GqlResult, Scalar, ScalarType, Schema, SimpleObject, Value,
+    dataloader::DataLoader, extensions, ComplexObject, Context, EmptyMutation, EmptySubscription,
+    Error as GqlError, InputValueError, Object, Result as GqlResult, Scalar, ScalarType, Schema,
+    SimpleObject, Value,
 };
 use loaders::{load_many, load_one};
-use std::{collections::HashMap, hash::Hash, marker::PhantomData};
+use std::{hash::Hash, marker::PhantomData};
 
 pub type KanbanSchema = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
 
@@ -109,6 +109,9 @@ pub struct Data {
 }
 
 pub struct QueryRoot;
+// re-export
+pub use async_graphql::EmptyMutation as MutationRoot;
+pub use async_graphql::EmptySubscription as SubscriptionRoot;
 
 #[Object]
 impl QueryRoot {

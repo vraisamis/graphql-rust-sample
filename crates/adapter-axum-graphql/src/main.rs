@@ -1,6 +1,6 @@
 mod model;
 
-use async_graphql::{http::GraphiQLSource, EmptyMutation, EmptySubscription, Schema};
+use async_graphql::http::GraphiQLSource;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
     extract::Extension,
@@ -8,21 +8,11 @@ use axum::{
     routing::get,
     Router, Server,
 };
-use model::{
-    kanban::{
-        dataloader::KanbanSchema as DataLoaderSchema, simple::KanbanSchema as SimpleSchema,
-        storage::KanbanSchema as StorageSchema, validate::KanbanSchema as ValidateSchema,
-        SchemaWithStaticData,
-    },
-    starwars::{QueryRoot, StarWars, StarWarsSchema},
+use model::kanban::{
+    dataloader::KanbanSchema as DataLoaderSchema, simple::KanbanSchema as SimpleSchema,
+    storage::KanbanSchema as StorageSchema, validate::KanbanSchema as ValidateSchema,
+    SchemaWithStaticData,
 };
-
-async fn starwars_graphql_handler(
-    schema: Extension<StarWarsSchema>,
-    req: GraphQLRequest,
-) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
-}
 
 async fn kanban_graphql_handler(
     schema: Extension<SimpleSchema>,
@@ -59,19 +49,12 @@ async fn graphiql(endpoint: &str) -> impl IntoResponse {
 #[tokio::main]
 async fn main() {
     logger_init();
-    let schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription)
-        .data(StarWars::new())
-        .finish();
     let kanban_schema = SimpleSchema::schema_with_static_data();
     let validate_schema = ValidateSchema::schema_with_static_data();
     let storage_schema = StorageSchema::schema_with_static_data();
     let datalader_schema = DataLoaderSchema::schema_with_static_data();
 
     let app = Router::new()
-        .route(
-            "/starwars",
-            get(|| graphiql("/starwars")).post(starwars_graphql_handler),
-        )
         .route("/", get(|| graphiql("/")).post(kanban_graphql_handler))
         .route(
             "/v",
@@ -85,7 +68,6 @@ async fn main() {
             "/d",
             get(|| graphiql("/d")).post(kanban_dataloader_graphql_handler),
         )
-        .layer(Extension(schema))
         .layer(Extension(kanban_schema))
         .layer(Extension(validate_schema))
         .layer(Extension(storage_schema))
