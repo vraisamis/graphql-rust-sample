@@ -54,3 +54,28 @@ classDiagram
     Board --> Column : has
     Column --> Card : contains
 ```
+
+# Layer
+```mermaid
+graph TD
+
+subgraph Domain Layer
+    A[domain-*]
+end
+
+subgraph Application Layer
+    C[application-service] --> A
+    D[query-resolver]
+end
+
+subgraph InfrastructureLayer
+    E[infrastructure-rds] --> D
+    H[infrastructure-dynamodb] --> A
+end
+
+subgraph Presentation Layer
+    F[presentation-graphql] --> C
+    F --> D
+    G[presentation-axum] --> F
+end
+```

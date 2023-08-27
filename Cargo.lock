@@ -748,6 +748,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "infrastructure-rdb"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "query-resolver",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1008,6 +1017,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "18fb31db3f9bddb2ea821cde30a9f70117e3f119938b5ee630b7403aa6e2ead9"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "query-resolver"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
 ]
 
 [[package]]
