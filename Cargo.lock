@@ -13,6 +13,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "adapter-axum"
+version = "0.1.0"
+dependencies = [
+ "adapter-graphql",
+ "anyhow",
+ "async-graphql-axum",
+ "axum",
+ "axum-macros",
+ "tracing",
+]
+
+[[package]]
 name = "adapter-axum-graphql"
 version = "0.1.0"
 dependencies = [
@@ -26,6 +38,15 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "adapter-graphql"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-graphql",
+ "async-trait",
 ]
 
 [[package]]
@@ -260,6 +281,18 @@ dependencies = [
  "rustversion",
  "tower-layer",
  "tower-service",
+]
+
+[[package]]
+name = "axum-macros"
+version = "0.3.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cdca6a10ecad987bda04e95606ef85a5417dcaac1a78455242d72e031e2b6b62"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -751,6 +784,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e999beba7b6e8345721bd280141ed958096a2e4abdf74f67ff4ce49b4b54e47a"
 dependencies = [
  "hashbrown 0.12.3",
+]
+
+[[package]]
+name = "main"
+version = "0.1.0"
+dependencies = [
+ "adapter-axum",
+ "anyhow",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
