@@ -13,18 +13,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "adapter-axum"
-version = "0.1.0"
-dependencies = [
- "adapter-graphql",
- "anyhow",
- "async-graphql-axum",
- "axum",
- "axum-macros",
- "tracing",
-]
-
-[[package]]
 name = "adapter-axum-graphql"
 version = "0.1.0"
 dependencies = [
@@ -38,15 +26,6 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "adapter-graphql"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-graphql",
- "async-trait",
 ]
 
 [[package]]
@@ -799,8 +778,8 @@ dependencies = [
 name = "main"
 version = "0.1.0"
 dependencies = [
- "adapter-axum",
  "anyhow",
+ "presentation-axum",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -999,6 +978,27 @@ name = "ppv-lite86"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
+
+[[package]]
+name = "presentation-axum"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-graphql-axum",
+ "axum",
+ "axum-macros",
+ "presentation-graphql",
+ "tracing",
+]
+
+[[package]]
+name = "presentation-graphql"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-graphql",
+ "async-trait",
+]
 
 [[package]]
 name = "proc-macro-crate"

@@ -2,7 +2,7 @@ use anyhow::Result;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{extract::Extension, response::Html, routing::get, Router, Server};
 
-use adapter_graphql::GraphQL;
+use presentation_graphql::GraphQL;
 
 pub struct App;
 
