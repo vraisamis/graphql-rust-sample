@@ -2,7 +2,7 @@ use anyhow::Result;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{extract::Extension, response::Html, routing::get, Router, Server};
 
-use presentation_graphql::GraphQL;
+use presentation_graphql::{GraphQL, Spawner};
 
 pub struct App;
 
@@ -13,8 +13,11 @@ impl App {
     }
 
     // TODO: return type
-    pub async fn run(&self) -> Result<()> {
-        let gql = GraphQL::new();
+    pub async fn run<S, R>(&self, spawner: S) -> Result<()>
+    where
+        S: Spawner<R>,
+    {
+        let gql = GraphQL::new(spawner);
 
         let app = Router::new()
             .route(

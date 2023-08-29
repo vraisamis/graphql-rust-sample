@@ -9,3 +9,4 @@ edition = "2021"
 anyhow = "1.0.72"
 async-graphql = { version = "6.0.0", features = ["log", "dataloader"] }
 async-trait = "0.1.72"
+futures-util = "0.3.28"
