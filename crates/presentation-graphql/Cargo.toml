@@ -3,14 +3,19 @@ name = "presentation-graphql"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.72"
-async-graphql = { version = "6.0.0", features = ["log", "dataloader"] }
-async-trait = "0.1.72"
-futures-util = "0.3.28"
-query-resolver = { path = "../query-resolver" }
+anyhow.workspace = true
+async-trait.workspace = true
+futures-util.workspace = true
+
+# layer paths ----------------
 # TODO: 取り除きたい
-infrastructure-rdb = { path = "../infrastructure-rdb" }
-domain-util = { path = "../domain-util" }
+infrastructure-rdb.workspace = true
+query-resolver.workspace = true
+domain-util.workspace = true
+
+
+[dependencies.async-graphql]
+version = "6.0.0"
+features = ["log", "dataloader"]

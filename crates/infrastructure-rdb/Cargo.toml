@@ -6,7 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "0.1.72"
-anyhow = "1.0.72"
-query-resolver = { path = "../query-resolver" }
-domain-kanban = { path = "../domain-kanban" }
+anyhow.workspace = true
+async-trait.workspace = true
+
+# layer paths ----------------
+query-resolver.workspace = true
+domain-kanban.workspace = true
