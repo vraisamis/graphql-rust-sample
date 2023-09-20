@@ -1,5 +1,5 @@
 #![allow(unused)]
-use crate::Identifier;
+use domain_util::{Entity, Identifier};
 
 #[derive(Debug)]
 pub struct User {
@@ -10,7 +10,7 @@ pub struct User {
 
 impl User {
     pub fn new(name: UserName, email: Email) -> Self {
-        let user_id = UserId::new();
+        let user_id = UserId::gen();
         Self {
             user_id,
             name,
@@ -20,6 +20,12 @@ impl User {
 
     pub fn user_id(&self) -> &UserId {
         &self.user_id
+    }
+}
+
+impl Entity for User {
+    fn entity_type() -> &'static str {
+        "user"
     }
 }
 

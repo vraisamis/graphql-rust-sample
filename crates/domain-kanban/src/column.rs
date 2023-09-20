@@ -1,5 +1,5 @@
 #![allow(unused)]
-use crate::Identifier;
+use domain_util::{Entity, Identifier};
 
 pub struct Column {
     id: ColumnId,
@@ -10,7 +10,7 @@ pub struct Column {
 impl Column {
     pub fn new(title: ColumnTitle) -> Self {
         Self {
-            id: ColumnId::new(),
+            id: ColumnId::gen(),
             title,
             cards: vec![],
         }
@@ -44,6 +44,12 @@ impl Column {
     }
 }
 
+impl Entity for Column {
+    fn entity_type() -> &'static str {
+        "column"
+    }
+}
+
 pub type ColumnId = Identifier<Column>;
 
 pub struct ColumnTitle(String);
@@ -66,14 +72,14 @@ pub struct Card {
 impl Card {
     pub fn new(title: CardTitle) -> Self {
         Self {
-            id: CardId::new(),
+            id: CardId::gen(),
             title,
             description: CardDescription::new("".to_owned()),
         }
     }
     pub fn with_description(title: CardTitle, description: CardDescription) -> Self {
         Self {
-            id: CardId::new(),
+            id: CardId::gen(),
             title,
             description,
         }
@@ -87,6 +93,12 @@ impl Card {
     pub fn edit_description(mut self, new_description: CardDescription) -> Self {
         self.description = new_description;
         self
+    }
+}
+
+impl Entity for Card {
+    fn entity_type() -> &'static str {
+        "card"
     }
 }
 

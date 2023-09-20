@@ -9,3 +9,4 @@ edition = "2021"
 async-trait = "0.1.72"
 anyhow = "1.0.72"
 query-resolver = { path = "../query-resolver" }
+domain-kanban = { path = "../domain-kanban" }

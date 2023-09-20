@@ -60,7 +60,8 @@ classDiagram
 graph TD
 
 subgraph Domain Layer
-    A[domain-*]
+    A[domain-*] --> B
+    B[domain-util]
 end
 
 subgraph Application Layer

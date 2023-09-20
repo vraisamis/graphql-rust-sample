@@ -7,6 +7,7 @@ use async_graphql::{
     EmptySubscription, Request, Response, Schema,
 };
 use futures_util::future::BoxFuture;
+use infrastructure_rdb::UsersQueryImpl;
 use model::QueryRoot as Query;
 
 #[derive(Clone)]
@@ -25,9 +26,11 @@ impl GraphQL {
     where
         S: Spawner<R>,
     {
-        let i = Injections;
+        let i = Injections::new();
         let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
-            .data(DataLoader::new(i, spawner))
+            .data(DataLoader::new(i.clone(), spawner))
+            // TODO: dataloaderのみにする
+            .data(i)
             .extension(Logger)
             .finish();
 
@@ -43,4 +46,16 @@ impl GraphQL {
     }
 }
 
-pub struct Injections;
+// TODO: あとでinfrastructureを除去
+#[derive(Debug, Clone)]
+pub struct Injections {
+    user_query: UsersQueryImpl,
+}
+
+impl Injections {
+    pub fn new() -> Self {
+        Self {
+            user_query: UsersQueryImpl,
+        }
+    }
+}

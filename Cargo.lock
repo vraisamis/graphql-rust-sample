@@ -424,6 +424,15 @@ name = "domain-kanban"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "domain-util",
+ "thiserror",
+ "ulid",
+]
+
+[[package]]
+name = "domain-util"
+version = "0.1.0"
+dependencies = [
  "thiserror",
  "ulid",
 ]
@@ -744,6 +753,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "domain-kanban",
  "query-resolver",
 ]
 
@@ -1010,7 +1020,10 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-trait",
+ "domain-util",
  "futures-util",
+ "infrastructure-rdb",
+ "query-resolver",
 ]
 
 [[package]]
@@ -1038,6 +1051,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "domain-kanban",
 ]
 
 [[package]]
@@ -1329,18 +1343,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.44"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "611040a08a0439f8248d1990b111c95baa9c704c805fa1f62104b39655fd7f90"
+checksum = "97a802ec30afc17eee47b2855fc72e0c4cd62be9b4efe6591edde0ec5bd68d8f"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.44"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "090198534930841fab3a5d1bb637cde49e339654e606195f8d9c76eeb081dc96"
+checksum = "6bb623b56e39ab7dcd4b1b98bb6c8f8d907ed255b18de254088016b27a8ee19b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1570,9 +1584,9 @@ checksum = "ed646292ffc8188ef8ea4d1e0e0150fb15a5c2e12ad9b8fc191ae7a8a7f3c4b9"
 
 [[package]]
 name = "ulid"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13a3aaa69b04e5b66cc27309710a569ea23593612387d67daaf102e73aa974fd"
+checksum = "0f9d3475df4ff8a8f7804c0fc3394b44fdcfc4fb635717bf05fbb7c41c83a376"
 dependencies = [
  "rand",
 ]
