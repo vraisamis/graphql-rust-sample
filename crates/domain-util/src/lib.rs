@@ -27,15 +27,6 @@ impl<T: Entity> Identifier<T> {
     }
 }
 
-// impl<T: Entity> From<Ulid> for Identifier<T> {
-//     fn from(value: Ulid) -> Self {
-//         Self {
-//             value,
-//             _phantomdata: PhantomData,
-//         }
-//     }
-// }
-
 impl<T: Entity, V> From<V> for Identifier<T>
 where
     V: Into<Ulid>,
@@ -51,8 +42,6 @@ where
 
 impl<T: Entity> DebugTrait for Identifier<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // NOTE: 型aliasをつけても、Identifier<T> になってしまう
-        // f.debug_tuple(type_name::<Self>())
         f.debug_tuple(&format!("Identifier<{}>", T::entity_type()))
             .field(&self.value.to_string())
             .finish()
@@ -116,7 +105,7 @@ impl<T: Entity> Hash for Identifier<T> {
 pub enum IdentifierParseError {
     #[error("文字列に `-` が含まれていません")]
     NotContainsSeparator,
-    #[error("ULIDパース失敗")]
+    #[error("ULIDパース失敗: {0}")]
     ParseError(#[from] DecodeError),
     #[error("IDの型が違います (expected: {expected}, actual: {actual})")]
     InvalidTypePrefix { expected: String, actual: String },

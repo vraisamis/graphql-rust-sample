@@ -51,23 +51,6 @@ impl From<String> for Email {
     }
 }
 
-// TODO
-// impl ModelInvariants for Email {
-//     fn invariants() -> Vec<&'static Invariant<Self>> {
-//         vec![&invariant::length_not_zero]
-//     }
-// }
-//
-// mod invariant {
-//     use crate::InvariantResult;
-//
-//     use super::Email;
-//
-//     pub fn length_not_zero(email: Email) -> InvariantResult<Email> {
-//         Ok(email)
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;
