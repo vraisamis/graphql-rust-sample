@@ -1,13 +1,7 @@
-use std::collections::HashMap;
-
-use async_graphql::{
-    dataloader::Loader, ComplexObject, Context, Result as GqlResult, SimpleObject,
-};
-use async_trait::async_trait;
+use crate::scalar::Id;
+use async_graphql::SimpleObject;
 use domain_util::{Entity, Identifier};
-use query_resolver::{UserView, UsersQuery};
-
-use crate::{scalar::Id, Injections};
+use query_resolver::UserView;
 
 // TODO
 struct Board;
@@ -59,42 +53,5 @@ impl From<UserView> for User {
 impl<T, U: Entity> Into<Identifier<U>> for Id<T> {
     fn into(self) -> Identifier<U> {
         self.value().parse().unwrap()
-    }
-}
-
-#[async_trait]
-impl Loader<Id<User>> for Injections {
-    type Value = User;
-    // TODO
-    type Error = String;
-
-    async fn load(&self, keys: &[Id<User>]) -> Result<HashMap<Id<User>, Self::Value>, Self::Error> {
-        println!(
-            "[Dataloader] CALLED DataLoader of Id<User> -> User: {:?}",
-            keys
-        );
-        // TODO
-        let ids: Vec<_> = keys.iter().map(|i| i.clone().into()).collect();
-        let result = self
-            .user_query
-            .list_by_ids(&ids)
-            .await
-            .expect("query error");
-        Ok(result
-            .into_iter()
-            .map(|(k, v)| (k.to_string().into(), v.into()))
-            .collect())
-        // let result: HashMap<Id<User>, User> = self
-        //     .users
-        //     .iter()
-        //     .filter_map(|u| {
-        //         if keys.contains(&u.id) {
-        //             Some((u.id.clone(), u.clone()))
-        //         } else {
-        //             None
-        //         }
-        //     })
-        //     .collect();
-        // Ok(result)
     }
 }
