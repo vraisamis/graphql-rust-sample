@@ -1,4 +1,5 @@
 mod model;
+mod provides;
 mod scalar;
 mod validator;
 
@@ -9,6 +10,7 @@ use async_graphql::{
 use futures_util::future::BoxFuture;
 use infrastructure_rdb::UsersQueryImpl;
 use model::QueryRoot as Query;
+pub use provides::Modules;
 
 #[derive(Clone)]
 pub struct GraphQL {
@@ -22,15 +24,18 @@ pub trait Spawner<R>: Fn(BoxFuture<'static, ()>) -> R + Send + Sync + 'static {}
 impl<T, R> Spawner<R> for T where T: Fn(BoxFuture<'static, ()>) -> R + Send + Sync + 'static {}
 
 impl GraphQL {
-    pub fn new<S, R>(spawner: S) -> Self
+    pub fn new<S, R>(spawner: S, m: Modules) -> Self
     where
         S: Spawner<R>,
     {
         let i = Injections::new();
         let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
-            .data(DataLoader::new(i.clone(), spawner))
-            // TODO: dataloaderのみにする
-            .data(i)
+            // .data(DataLoader::new(i.clone(), spawner))
+            // // TODO: dataloaderのみにする
+            // .data(i)
+            // TODO: dataloader
+            // NOTE: Modulesをdataに持っていることはContextからは見られないけど、諦めた方がよさそう
+            .data(m)
             .extension(Logger)
             .finish();
 

@@ -11,6 +11,7 @@ tracing-subscriber.workspace = true
 
 # layer paths ----------------
 presentation-axum.workspace = true
+infrastructure-rdb.workspace = true
 # TODO: injection
 
 

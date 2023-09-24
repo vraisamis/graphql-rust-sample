@@ -1,11 +1,13 @@
 use anyhow::Result;
-use presentation_axum::App;
+use infrastructure_rdb::QueryModule;
+use presentation_axum::{App, Modules};
 use tokio::spawn;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     logger_init();
-    App::new()?.run(spawn).await?;
+    let m = Modules::new(Box::new(QueryModule::builder().build()));
+    App::new()?.run(spawn, m).await?;
     Ok(())
 }
 

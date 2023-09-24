@@ -3,10 +3,11 @@ mod user;
 use async_graphql::{dataloader::DataLoader, Context, Object, Result as GqlResult};
 use query_resolver::UsersQuery;
 
-use crate::{scalar::Id, Injections};
+use crate::{provides::Modules, scalar::Id, Injections};
 
 use self::user::User;
 use crate::validator;
+use shaku::HasProvider;
 
 pub struct QueryRoot;
 
@@ -22,9 +23,12 @@ impl QueryRoot {
         Ok(r)
     }
     async fn users<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<User>> {
-        let i: &Injections = ctx.data()?;
-        let result = i
-            .user_query
+        let modules: &Modules = ctx.data()?;
+        // TODO remove unwrap
+        let user_query = HasProvider::<dyn UsersQuery>::provide(modules.m.as_ref()).unwrap();
+        // let i: &Injections = ctx.data()?;
+        // let result = i
+        let result = user_query
             .all()
             .await?
             .into_iter()

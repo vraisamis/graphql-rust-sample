@@ -4,8 +4,17 @@ use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use domain_kanban::user::UserId;
 use query_resolver::{UserView, UsersQuery};
+use shaku::Provider;
 
-#[derive(Debug, Clone)]
+shaku::module! {
+    pub QueryModule {
+        components = [],
+        providers = [UsersQueryImpl]
+    }
+}
+
+#[derive(Debug, Clone, Provider)]
+#[shaku(interface = UsersQuery)]
 pub struct UsersQueryImpl;
 impl UsersQueryImpl {
     fn to_view(u: &sample::User) -> UserView {
