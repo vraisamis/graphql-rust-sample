@@ -18,8 +18,8 @@ impl Loader<Id<User>> for Modules {
             keys
         );
         let ids: Vec<_> = keys.iter().map(|i| i.clone().into()).collect();
-        // TODO: remove unwrap
-        let user_query: Box<dyn UsersQuery> = self.m.as_ref().provide_gql_result()?;
+        let user_query: Box<dyn UsersQuery> = self.m().provide_gql_result()?;
+        // TODO: remove expect
         let result = user_query.list_by_ids(&ids).await.expect("query error");
         Ok(result
             .into_iter()

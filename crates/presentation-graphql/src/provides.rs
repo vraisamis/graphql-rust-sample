@@ -19,6 +19,10 @@ impl Modules {
     pub fn new(m: Box<dyn QueryProvider + Send + Sync>) -> Self {
         Self { m }
     }
+
+    pub fn m(&self) -> &dyn QueryProvider {
+        self.m.as_ref()
+    }
 }
 
 // ContextにDataLoader, Modulesを取得するメソッドを作成する
