@@ -23,7 +23,6 @@ impl QueryRoot {
     }
     async fn users<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<User>> {
         let modules: &Modules = ctx.modules()?;
-        // TODO remove unwrap
         let user_query = modules.m().provide_gql_result()?;
         let result = user_query
             .all()

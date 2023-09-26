@@ -1029,7 +1029,6 @@ dependencies = [
  "async-trait",
  "domain-util",
  "futures-util",
- "infrastructure-rdb",
  "query-resolver",
  "shaku",
 ]

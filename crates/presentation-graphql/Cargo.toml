@@ -11,8 +11,6 @@ futures-util.workspace = true
 shaku.workspace = true
 
 # layer paths ----------------
-# TODO: 取り除きたい
-infrastructure-rdb.workspace = true
 query-resolver.workspace = true
 domain-util.workspace = true
 
