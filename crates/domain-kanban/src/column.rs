@@ -1,6 +1,6 @@
-#![allow(unused)]
 use domain_util::{Entity, Identifier};
 
+#[allow(unused)]
 pub struct Column {
     id: ColumnId,
     title: ColumnTitle,
@@ -60,9 +60,9 @@ impl ColumnTitle {
     }
 }
 
+#[allow(unused)]
 pub struct Card {
     // idは参考用
-    #[allow(dead_code)]
     id: CardId,
     title: CardTitle,
     description: CardDescription,

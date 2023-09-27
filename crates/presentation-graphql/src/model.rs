@@ -4,9 +4,7 @@ pub use self::user::*;
 use crate::provides::{ContextExt, HasProviderGql};
 use crate::validator;
 use crate::{provides::Modules, scalar::Id};
-use async_graphql::{dataloader::DataLoader, Context, Object, Result as GqlResult};
-use query_resolver::UsersQuery;
-use shaku::HasProvider;
+use async_graphql::{Context, Object, Result as GqlResult};
 
 pub struct QueryRoot;
 
@@ -15,7 +13,9 @@ impl QueryRoot {
     async fn get_user<'a>(
         &self,
         ctx: &Context<'a>,
-        #[graphql(validator(custom = "validator::IdValidator::new()"))] id: Id<User>,
+        #[graphql(validator(custom = r#"validator::IdValidator::new("User", "user")"#))] id: Id<
+            User,
+        >,
     ) -> GqlResult<Option<User>> {
         let loader = ctx.data_loader()?;
         let r: Option<_> = loader.load_one(id).await?;

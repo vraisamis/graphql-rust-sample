@@ -1,13 +1,12 @@
-#![allow(unused)]
 use crate::{column::ColumnId, user::UserId};
 use domain_util::{Entity, Identifier};
 
+#[allow(unused)]
 pub struct Board {
     id: BoardId,
     title: BoardTitle,
     owner: UserId,
     members: Vec<UserId>,
-    // TODO
     column_ids: Vec<ColumnId>,
 }
 

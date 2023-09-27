@@ -1,6 +1,6 @@
-#![allow(unused)]
 use domain_util::{Entity, Identifier};
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct User {
     user_id: UserId,

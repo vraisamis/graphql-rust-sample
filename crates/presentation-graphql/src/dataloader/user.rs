@@ -9,7 +9,6 @@ use std::collections::HashMap;
 #[async_trait]
 impl Loader<Id<User>> for Modules {
     type Value = User;
-    // TODO: error type
     type Error = GqlError;
 
     async fn load(&self, keys: &[Id<User>]) -> Result<HashMap<Id<User>, Self::Value>, Self::Error> {

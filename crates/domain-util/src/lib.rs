@@ -27,8 +27,9 @@ impl<T: Entity> Identifier<T> {
     }
 }
 
-impl<T: Entity, V> From<V> for Identifier<T>
+impl<T, V> From<V> for Identifier<T>
 where
+    T: Entity,
     V: Into<Ulid>,
 {
     fn from(value: V) -> Self {
