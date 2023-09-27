@@ -14,7 +14,6 @@ pub struct User {
     pub id: UserId,
     pub name: String,
     pub email: String,
-    // #[graphql(skip)]
     pub owned_board_ids: Vec<BoardId>,
 }
 
@@ -34,12 +33,12 @@ impl User {
     }
 }
 
-// #[derive(Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Board {
-    id: BoardId,
-    title: String,
-    owner_id: UserId,
-    column_ids: Vec<ColumnId>,
+    pub id: BoardId,
+    pub title: String,
+    pub owner_id: UserId,
+    pub column_ids: Vec<ColumnId>,
 }
 
 impl Board {
@@ -58,10 +57,11 @@ impl Board {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Column {
-    id: ColumnId,
-    title: String,
-    cards: Vec<Card>,
+    pub id: ColumnId,
+    pub title: String,
+    pub cards: Vec<Card>,
 }
 
 impl Column {
@@ -74,10 +74,11 @@ impl Column {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Card {
-    id: String,
-    title: String,
-    description: String,
+    pub id: String,
+    pub title: String,
+    pub description: String,
 }
 
 impl Card {
@@ -96,8 +97,8 @@ impl Card {
 
 pub struct Data {
     pub users: Vec<User>,
-    boards: Vec<Board>,
-    columns: Vec<Column>,
+    pub boards: Vec<Board>,
+    pub columns: Vec<Column>,
 }
 impl Data {
     pub fn new() -> Self {

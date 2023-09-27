@@ -1,3 +1,5 @@
+mod board;
+mod column;
 mod user;
 
 shaku::module! {

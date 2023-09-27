@@ -10,11 +10,10 @@ use shaku::Provider;
 #[derive(Debug, Clone, Provider)]
 #[shaku(interface = UsersQuery)]
 pub struct UsersQueryImpl;
-impl UsersQueryImpl {
-    fn to_view(u: &sample::User) -> UserView {
-        UserView {
-            id: u.id.to_string(),
-        }
+
+fn to_view(u: &sample::User) -> UserView {
+    UserView {
+        id: u.id.to_string(),
     }
 }
 
@@ -26,7 +25,7 @@ impl UsersQuery for UsersQueryImpl {
             .users
             .iter()
             .filter(|u| &u.id == id)
-            .map(Self::to_view)
+            .map(to_view)
             .next()
             .ok_or(anyhow!("Not Found"))?;
         Ok(result)
@@ -36,16 +35,13 @@ impl UsersQuery for UsersQueryImpl {
         let result = data
             .users
             .iter()
-            .filter_map(|u| {
-                ids.contains(&u.id)
-                    .then(|| (u.id.clone(), Self::to_view(u)))
-            })
+            .filter_map(|u| ids.contains(&u.id).then(|| (u.id.clone(), to_view(u))))
             .collect();
         Ok(result)
     }
     async fn all(&self) -> Result<Vec<UserView>> {
         let data = sample::data();
-        let result = data.users.iter().map(Self::to_view).collect();
+        let result = data.users.iter().map(to_view).collect();
         Ok(result)
     }
 }
