@@ -14,5 +14,8 @@ pub trait BoardQuery: Interface {
 
 pub struct BoardView {
     pub id: String,
+    pub title: String,
+    pub owner_id: String,
+    pub column_ids: Vec<String>,
     // TODO
 }

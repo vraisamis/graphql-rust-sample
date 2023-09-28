@@ -18,7 +18,8 @@ impl BoardQuery for BoardQueryImpl {
         let data = sample::data();
         let result = data
             .boards
-            .iter()
+            .clone()
+            .into_iter()
             .filter(|b| &b.id == id)
             .map(to_view)
             .next()
@@ -30,7 +31,8 @@ impl BoardQuery for BoardQueryImpl {
         let data = sample::data();
         let result = data
             .boards
-            .iter()
+            .clone()
+            .into_iter()
             .filter_map(|b| ids.contains(&b.id).then(|| (b.id.clone(), to_view(b))))
             .collect();
         Ok(result)
@@ -38,13 +40,16 @@ impl BoardQuery for BoardQueryImpl {
 
     async fn all(&self) -> Result<Vec<BoardView>> {
         let data = sample::data();
-        let result = data.boards.iter().map(to_view).collect();
+        let result = data.boards.clone().into_iter().map(to_view).collect();
         Ok(result)
     }
 }
 
-fn to_view(b: &sample::Board) -> BoardView {
+fn to_view(b: sample::Board) -> BoardView {
     BoardView {
         id: b.id.to_string(),
+        title: b.title,
+        owner_id: b.owner_id.to_string(),
+        column_ids: b.column_ids.into_iter().map(|i| i.to_string()).collect(),
     }
 }

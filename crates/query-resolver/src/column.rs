@@ -13,10 +13,6 @@ pub trait ColumnsQuery: Interface {
 
 pub struct ColumnView {
     pub id: String,
-    pub cards: Vec<CardView>,
-    // TODO
-}
-
-pub struct CardView {
-    pub id: String,
+    pub title: String,
+    pub card_cnt: usize,
 }
