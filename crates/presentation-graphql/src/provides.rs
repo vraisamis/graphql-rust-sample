@@ -1,4 +1,4 @@
-use std::any::{type_name, TypeId};
+use std::any::type_name;
 
 use async_graphql::{dataloader::DataLoader, Context, Error as GqlError};
 use query_resolver::UsersQuery;

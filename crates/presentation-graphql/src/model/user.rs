@@ -46,7 +46,7 @@ impl User {
 
 impl From<UserView> for User {
     fn from(value: UserView) -> Self {
-        Self::new(value.id, "", "")
+        Self::new(value.id, value.name, value.email)
     }
 }
 

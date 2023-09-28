@@ -14,5 +14,7 @@ pub trait UsersQuery: Interface {
 
 pub struct UserView {
     pub id: String,
+    pub name: String,
+    pub email: String,
     // TODO
 }

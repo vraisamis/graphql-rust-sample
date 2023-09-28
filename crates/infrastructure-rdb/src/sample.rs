@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use std::sync::OnceLock;
 
 use domain_kanban::board::BoardId;
@@ -102,17 +103,25 @@ pub struct Data {
 }
 impl Data {
     pub fn new() -> Self {
-        let user_ids = vec![UserId::gen(), UserId::gen(), UserId::gen()];
-        let board_ids = vec![BoardId::gen(), BoardId::gen(), BoardId::gen()];
+        let user_ids = vec![
+            UserId::from_str("user-01HBCCGK3MG5HA7GJG25BGV6PJ").unwrap(),
+            UserId::from_str("user-01HBCCGK3MH7XKWBDHXSWCAPWA").unwrap(),
+            UserId::from_str("user-01HBCCGK3MS53D8NM6EYZ0KZEH").unwrap(),
+        ];
+        let board_ids = vec![
+            BoardId::from_str("board-01HBCCGK3MH83RJ4Y8AVECQ5W9").unwrap(),
+            BoardId::from_str("board-01HBCCGK3M3039H2QQEYD94TMS").unwrap(),
+            BoardId::from_str("board-01HBCCGK3M18C851FA0067MRPF").unwrap(),
+        ];
         let column_ids = vec![
-            ColumnId::gen(),
-            ColumnId::gen(),
-            ColumnId::gen(),
-            ColumnId::gen(),
-            ColumnId::gen(),
-            ColumnId::gen(),
-            ColumnId::gen(),
-            ColumnId::gen(),
+            ColumnId::from_str("column-01HBCCGK3MAWDZKS74M1DEJQ54").unwrap(),
+            ColumnId::from_str("column-01HBCCGK3MR41MEZWGJERC5PHD").unwrap(),
+            ColumnId::from_str("column-01HBCCGK3MDQRSF7X7EGKBMAY8").unwrap(),
+            ColumnId::from_str("column-01HBCCGK3MDD8M1T47N4MDB6AA").unwrap(),
+            ColumnId::from_str("column-01HBCCGK3MMEFTBS3SJ73CK96K").unwrap(),
+            ColumnId::from_str("column-01HBCCGK3M9BMDD7Z16JQNX3QC").unwrap(),
+            ColumnId::from_str("column-01HBCCGK3MTAFEVEFAQMFE2W43").unwrap(),
+            ColumnId::from_str("column-01HBCCGK3M3SA44D9SCJVR5D8X").unwrap(),
         ];
         let users = vec![
             User::new(
@@ -216,6 +225,12 @@ impl Data {
                 vec![column_ids[6].clone(), column_ids[7].clone()],
             ),
         ];
+        println!("######## users ########");
+        println!("{:?}", user_ids);
+        println!("######## boards ########");
+        println!("{:?}", board_ids);
+        println!("######## columns ########");
+        println!("{:?}", column_ids);
 
         Data {
             users,
