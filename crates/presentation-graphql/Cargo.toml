@@ -13,6 +13,7 @@ shaku.workspace = true
 
 # layer paths ----------------
 query-resolver.workspace = true
+domain-kanban.workspace = true
 domain-util.workspace = true
 
 

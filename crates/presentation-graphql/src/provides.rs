@@ -1,4 +1,4 @@
-use std::any::type_name;
+use std::{any::type_name, sync::Arc};
 
 use async_graphql::{dataloader::DataLoader, Context, Error as GqlError};
 use query_resolver::{BoardQuery, CardsQuery, ColumnsQuery, UsersQuery};
@@ -52,6 +52,9 @@ impl<'ctx> ContextExt for Context<'ctx> {
 // shakuのErrorをasync-graphqlにあわせる
 pub trait HasProviderGql<I: ?Sized>: HasProvider<I> {
     fn provide_gql_result(&self) -> Result<Box<I>, GqlError>;
+    fn provide_arc_gql_result(&self) -> Result<Arc<I>, GqlError> {
+        self.provide_gql_result().map(Arc::from)
+    }
 }
 
 impl<T, I: ?Sized> HasProviderGql<I> for T

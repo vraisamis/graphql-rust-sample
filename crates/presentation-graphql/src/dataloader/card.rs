@@ -25,30 +25,42 @@ impl Loader<(Id<Column>, usize)> for Modules {
             keys
         );
         let idmap: HashMap<_, _> = Vec::from(keys).into_iter().into_group_map();
-        let card_query: Box<dyn CardsQuery> = self.m().provide_gql_result()?;
-        let card_query: Arc<dyn CardsQuery> = Arc::from(card_query);
-        let result_future: Vec<_> = idmap
+        let card_query: Arc<dyn CardsQuery> = self.m().provide_arc_gql_result()?;
+        let futures: Vec<_> = idmap
             .into_iter()
-            .map(|(cid, us)| {
-                let card_query_clone = Arc::clone(&card_query);
-                async move {
-                    let column_id = cid.clone().into();
-                    let hash_map = card_query_clone.list_by_orders(&column_id, &us).await?;
-                    let hash_map = hash_map
-                        .into_iter()
-                        .map(|(u, v)| ((cid.clone(), u), v.into()))
-                        .collect::<HashMap<_, _>>();
-                    Result::<_>::Ok(hash_map)
-                }
-            })
+            .map(|(cid, us)| list_by_orders(Arc::clone(&card_query), cid, us))
             .collect();
-        let result = join_all(result_future).await;
-
-        let result = result.into_iter().collect::<Result<Vec<_>>>()?;
-        let result = result.into_iter().fold(HashMap::new(), |mut acc, h| {
-            acc.extend(h);
-            acc
-        });
-        Ok(result)
+        let result = join_all(futures)
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>>>()?;
+        let map = merge_all(result);
+        Ok(map)
     }
+}
+
+// id群からクエリを呼ぶ部分を抽出
+// inlineで書くと `async move` ブロックになる
+async fn list_by_orders(
+    card_query: Arc<dyn CardsQuery>,
+    id: Id<Column>,
+    indices: Vec<usize>,
+) -> Result<HashMap<(Id<Column>, usize), Card>> {
+    let column_id = id.clone().into();
+    let hash_map = card_query.list_by_orders(&column_id, &indices).await?;
+    let hash_map = hash_map
+        .into_iter()
+        .map(|(u, v)| ((id.clone(), u), v.into()))
+        .collect::<HashMap<_, _>>();
+    Ok(hash_map)
+}
+
+// hashMapをマージする
+fn merge_all<K: Eq + std::hash::Hash, V>(
+    hash_maps: impl IntoIterator<Item = HashMap<K, V>>,
+) -> HashMap<K, V> {
+    hash_maps.into_iter().fold(HashMap::new(), |mut acc, h| {
+        acc.extend(h);
+        acc
+    })
 }

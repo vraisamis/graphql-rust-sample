@@ -1422,6 +1422,7 @@ dependencies = [
  "anyhow",
  "async-graphql",
  "async-trait",
+ "domain-kanban",
  "domain-util",
  "futures-util",
  "itertools",
