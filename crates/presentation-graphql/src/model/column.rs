@@ -30,11 +30,10 @@ impl Column {
     async fn cards<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<Card>> {
         let loader = ctx.data_loader()?;
         let ids: Vec<_> = (0..self.cards_cnt)
-            .into_iter()
             .map(|i| (self.id.clone(), i))
             .collect();
         let map = loader.load_many(ids).await?;
-        let result = Vec::from_iter(map.into_values().into_iter());
+        let result = Vec::from_iter(map.into_values());
         Ok(result)
     }
 }

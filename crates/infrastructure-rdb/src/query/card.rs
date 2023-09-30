@@ -25,7 +25,7 @@ fn to_view(u: sample::Card) -> CardView {
 impl CardsQuery for CardsQueryImpl {
     async fn find_by_order(&self, column_id: &ColumnId, order: &usize) -> Result<CardView> {
         let data = sample::data();
-        let column = get_column(&data, column_id).ok_or_else(|| anyhow!("Not Found!"))?;
+        let column = get_column(data, column_id).ok_or_else(|| anyhow!("Not Found!"))?;
         let card = column
             .cards
             .get(*order)
@@ -41,7 +41,7 @@ impl CardsQuery for CardsQueryImpl {
         orders: &[usize],
     ) -> Result<HashMap<usize, CardView>> {
         let data = sample::data();
-        let column = get_column(&data, column_id).ok_or_else(|| anyhow!("Not Found!"))?;
+        let column = get_column(data, column_id).ok_or_else(|| anyhow!("Not Found!"))?;
         let result = orders
             .to_vec()
             .iter()
@@ -53,5 +53,5 @@ impl CardsQuery for CardsQueryImpl {
 }
 
 fn get_column<'a>(data: &'a Data, id: &'a ColumnId) -> Option<&'a Column> {
-    data.columns.iter().filter(|c| &c.id == id).next()
+    data.columns.iter().find(|c| &c.id == id)
 }

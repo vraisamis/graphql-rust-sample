@@ -67,7 +67,7 @@ where
             GqlError::new(format!(
                 "providing <{}> failed: {}",
                 type_name::<I>(),
-                e.to_string()
+                e
             ))
         })
     }

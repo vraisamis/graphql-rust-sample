@@ -88,8 +88,8 @@ impl<T: Entity> Eq for Identifier<T> {}
 impl<T: Entity> Clone for Identifier<T> {
     fn clone(&self) -> Self {
         Self {
-            value: self.value.clone(),
-            _phantomdata: self._phantomdata.clone(),
+            value: self.value,
+            _phantomdata: self._phantomdata,
         }
     }
 }

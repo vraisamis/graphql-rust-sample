@@ -45,9 +45,7 @@ pub struct Email(String);
 
 impl From<String> for Email {
     fn from(value: String) -> Self {
-        let v = Self(value);
-        // v.stisfy_invariants().unwrap()
-        v
+        Self(value)
     }
 }
 

@@ -16,7 +16,7 @@ mod todo_invariants {
             let init: Result<_, InvariantError> = Ok(self);
             invariants
                 .iter()
-                .fold(init, |result, func| result.and_then(|v| func(v)))
+                .fold(init, |result, func| result.and_then(func))
         }
     }
 

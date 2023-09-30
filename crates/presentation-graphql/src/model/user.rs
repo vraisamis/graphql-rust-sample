@@ -37,7 +37,7 @@ impl User {
         println!("CALLED Resolver: User.owned_boards(): load_many");
         let loader = ctx.data_loader()?;
         let map = loader.load_many(self.owned_board_ids.clone()).await?;
-        let result = Vec::from_iter(map.into_values().into_iter());
+        let result = Vec::from_iter(map.into_values());
         Ok(result)
     }
 }
@@ -48,8 +48,8 @@ impl From<UserView> for User {
     }
 }
 
-impl<T, U: Entity> Into<Identifier<U>> for Id<T> {
-    fn into(self) -> Identifier<U> {
-        self.value().parse().unwrap()
+impl<T, U: Entity> From<Id<T>> for Identifier<U> {
+    fn from(val: Id<T>) -> Self {
+        val.value().parse().unwrap()
     }
 }
