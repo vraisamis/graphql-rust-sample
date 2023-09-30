@@ -8,6 +8,7 @@ edition = "2021"
 anyhow.workspace = true
 async-trait.workspace = true
 futures-util.workspace = true
+itertools.workspace = true
 shaku.workspace = true
 
 # layer paths ----------------

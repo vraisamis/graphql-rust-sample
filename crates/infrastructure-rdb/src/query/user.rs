@@ -16,6 +16,11 @@ fn to_view(u: sample::User) -> UserView {
         id: u.id.to_string(),
         name: u.name,
         email: u.email,
+        owned_board_ids: u
+            .owned_board_ids
+            .into_iter()
+            .map(|i| i.to_string())
+            .collect(),
     }
 }
 

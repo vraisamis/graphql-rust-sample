@@ -1424,6 +1424,7 @@ dependencies = [
  "async-trait",
  "domain-util",
  "futures-util",
+ "itertools",
  "query-resolver",
  "shaku",
 ]

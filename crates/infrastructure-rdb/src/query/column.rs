@@ -11,11 +11,12 @@ use shaku::Provider;
 #[shaku(interface = ColumnsQuery)]
 pub struct ColumnsQueryImpl;
 
-fn to_view(u: sample::Column) -> ColumnView {
+fn to_view(c: sample::Column) -> ColumnView {
+    println!("<<{}>>: {:?}", c.title, c.cards);
     ColumnView {
-        id: u.id.to_string(),
-        title: u.title,
-        card_cnt: u.cards.len(),
+        id: c.id.to_string(),
+        title: c.title,
+        card_cnt: c.cards.len(),
     }
 }
 
@@ -27,7 +28,7 @@ impl ColumnsQuery for ColumnsQueryImpl {
             .columns
             .clone()
             .into_iter()
-            .filter(|u| &u.id == id)
+            .filter(|c| &c.id == id)
             .map(to_view)
             .next()
             .ok_or(anyhow!("Not Found"))?;
@@ -39,7 +40,7 @@ impl ColumnsQuery for ColumnsQueryImpl {
             .columns
             .clone()
             .into_iter()
-            .filter_map(|u| ids.contains(&u.id).then(|| (u.id.clone(), to_view(u))))
+            .filter_map(|c| ids.contains(&c.id).then(|| (c.id.clone(), to_view(c))))
             .collect();
         Ok(result)
     }

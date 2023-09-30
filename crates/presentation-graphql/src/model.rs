@@ -1,16 +1,21 @@
+mod board;
+mod column;
 mod user;
 
+pub use self::board::*;
+pub use self::column::*;
 pub use self::user::*;
 use crate::provides::{ContextExt, HasProviderGql};
 use crate::validator;
 use crate::{provides::Modules, scalar::Id};
 use async_graphql::{Context, Object, Result as GqlResult};
+use query_resolver::UsersQuery;
 
 pub struct QueryRoot;
 
 #[Object]
 impl QueryRoot {
-    async fn get_user<'a>(
+    async fn user<'a>(
         &self,
         ctx: &Context<'a>,
         #[graphql(validator(custom = r#"validator::IdValidator::new("User", "user")"#))] id: Id<
@@ -21,9 +26,9 @@ impl QueryRoot {
         let r: Option<_> = loader.load_one(id).await?;
         Ok(r)
     }
-    async fn users<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<User>> {
+    async fn users_all<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<User>> {
         let modules: &Modules = ctx.modules()?;
-        let user_query = modules.m().provide_gql_result()?;
+        let user_query: Box<dyn UsersQuery> = modules.m().provide_gql_result()?;
         let result = user_query
             .all()
             .await?

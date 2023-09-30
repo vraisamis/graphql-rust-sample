@@ -3,10 +3,10 @@ use async_graphql::InputValueError;
 use async_graphql::Scalar;
 use async_graphql::ScalarType;
 use async_graphql::Value;
+use std::fmt::Debug as DebugTrait;
 use std::hash::Hash;
 use std::marker::PhantomData;
 
-#[derive(Debug, Clone)]
 pub struct Id<T> {
     value: String,
     _phantom: PhantomData<T>,
@@ -29,6 +29,22 @@ impl<T> Hash for Id<T> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.value.hash(state);
         self._phantom.hash(state);
+    }
+}
+impl<T> DebugTrait for Id<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Id")
+            .field("value", &self.value)
+            .field("_phantom", &self._phantom)
+            .finish()
+    }
+}
+impl<T> Clone for Id<T> {
+    fn clone(&self) -> Self {
+        Self {
+            value: self.value.clone(),
+            _phantom: self._phantom.clone(),
+        }
     }
 }
 

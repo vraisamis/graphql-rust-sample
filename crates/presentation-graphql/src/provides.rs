@@ -1,15 +1,25 @@
 use std::any::type_name;
 
 use async_graphql::{dataloader::DataLoader, Context, Error as GqlError};
-use query_resolver::UsersQuery;
+use query_resolver::{BoardQuery, CardsQuery, ColumnsQuery, UsersQuery};
 use shaku::HasProvider;
 
 pub trait QueryProvider
 where
     Self: HasProvider<dyn UsersQuery>,
+    Self: HasProvider<dyn BoardQuery>,
+    Self: HasProvider<dyn ColumnsQuery>,
+    Self: HasProvider<dyn CardsQuery>,
 {
 }
-impl<T> QueryProvider for T where T: HasProvider<dyn UsersQuery> {}
+impl<T> QueryProvider for T
+where
+    Self: HasProvider<dyn UsersQuery>,
+    Self: HasProvider<dyn BoardQuery>,
+    Self: HasProvider<dyn ColumnsQuery>,
+    Self: HasProvider<dyn CardsQuery>,
+{
+}
 
 pub struct Modules {
     pub(crate) m: Box<dyn QueryProvider + Send + Sync>,

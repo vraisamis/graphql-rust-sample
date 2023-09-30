@@ -16,5 +16,5 @@ pub struct UserView {
     pub id: String,
     pub name: String,
     pub email: String,
-    // TODO
+    pub owned_board_ids: Vec<String>,
 }
