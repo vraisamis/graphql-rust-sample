@@ -25,7 +25,7 @@ impl Loader<(Id<Column>, usize)> for Modules {
             keys
         );
         let idmap: HashMap<_, _> = Vec::from(keys).into_iter().into_group_map();
-        let card_query: Arc<dyn CardsQuery> = self.m().provide_arc_gql_result()?;
+        let card_query: Arc<dyn CardsQuery> = self.query().provide_arc_gql_result()?;
         let futures: Vec<_> = idmap
             .into_iter()
             .map(|(cid, us)| list_by_orders(Arc::clone(&card_query), cid, us))

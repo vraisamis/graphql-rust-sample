@@ -20,7 +20,7 @@ impl Loader<Id<Column>> for Modules {
             keys
         );
         let ids: Vec<_> = keys.iter().map(|i| i.clone().into()).collect();
-        let column_query: Box<dyn ColumnsQuery> = self.m().provide_gql_result()?;
+        let column_query: Box<dyn ColumnsQuery> = self.query().provide_gql_result()?;
         let result = column_query.list_by_ids(&ids).await.expect("query error");
         Ok(result
             .into_iter()

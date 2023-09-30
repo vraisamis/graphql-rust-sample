@@ -22,20 +22,21 @@ where
 }
 
 pub struct Modules {
-    pub(crate) m: Box<dyn QueryProvider + Send + Sync>,
+    pub query_providers: Box<dyn QueryProvider + Send + Sync>,
 }
 
 impl Modules {
-    pub fn new(m: Box<dyn QueryProvider + Send + Sync>) -> Self {
-        Self { m }
+    pub fn new(query_providers: Box<dyn QueryProvider + Send + Sync>) -> Self {
+        Self { query_providers }
     }
 
-    pub fn m(&self) -> &dyn QueryProvider {
-        self.m.as_ref()
+    pub fn query(&self) -> &dyn QueryProvider {
+        self.query_providers.as_ref()
     }
 }
 
 // ContextにDataLoader, Modulesを取得するメソッドを作成する
+// dataはAnyで型消去しているけど、このプロジェクト内ではSchemaを作っている箇所で必ず設定しているはずなので気にしないことにする
 pub trait ContextExt {
     fn data_loader(&self) -> Result<&DataLoader<Modules>, GqlError>;
     fn modules(&self) -> Result<&Modules, GqlError> {

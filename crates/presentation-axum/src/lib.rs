@@ -8,12 +8,10 @@ use presentation_graphql::{GraphQL, Spawner};
 pub struct App;
 
 impl App {
-    // TODO: return type
     pub fn new() -> Result<Self> {
         Ok(Self)
     }
 
-    // TODO: return type
     pub async fn run<S, R>(&self, spawner: S, m: Modules) -> Result<()>
     where
         S: Spawner<R>,

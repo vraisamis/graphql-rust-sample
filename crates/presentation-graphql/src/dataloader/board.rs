@@ -20,7 +20,7 @@ impl Loader<Id<Board>> for Modules {
             keys
         );
         let ids: Vec<_> = keys.iter().map(|i| i.clone().into()).collect();
-        let board_query: Box<dyn BoardQuery> = self.m().provide_gql_result()?;
+        let board_query: Box<dyn BoardQuery> = self.query().provide_gql_result()?;
         let result = board_query.list_by_ids(&ids).await.expect("query error");
         Ok(result
             .into_iter()

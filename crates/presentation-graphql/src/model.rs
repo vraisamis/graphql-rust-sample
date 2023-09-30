@@ -28,7 +28,7 @@ impl QueryRoot {
     }
     async fn users_all<'a>(&self, ctx: &Context<'a>) -> GqlResult<Vec<User>> {
         let modules: &Modules = ctx.modules()?;
-        let user_query: Box<dyn UsersQuery> = modules.m().provide_gql_result()?;
+        let user_query: Box<dyn UsersQuery> = modules.query().provide_gql_result()?;
         let result = user_query
             .all()
             .await?
