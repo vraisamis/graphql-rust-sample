@@ -1,0 +1,28 @@
+version: '3'
+services:
+  localstack:
+    image: localstack/localstack:2.3
+    environment:
+      # - SERVICES=dynamodb
+      - DEBUG=0
+      # - DATA_DIR=/tmp/localstack/data
+    ports:
+      - "60001:4566"
+      - "60002:4571"
+    volumes:
+      - localstack_data:/tmp/localstack
+
+  postgres:
+    image: postgres:16.0
+    environment:
+      POSTGRES_DB: gql_sample
+      POSTGRES_USER: gql
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "60003:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  localstack_data:
+  postgres_data:
