@@ -5,7 +5,7 @@ mod user;
 
 shaku::module! {
     pub Module {
-        components = [],
+        components = [super::PgPoolImpl],
         providers = [
             board::BoardQueryImpl,
             card::CardsQueryImpl,
