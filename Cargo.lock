@@ -517,6 +517,7 @@ dependencies = [
 name = "domain-util"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "thiserror",
  "ulid",
 ]
@@ -1639,7 +1640,10 @@ name = "scripts"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "infrastructure-rdb",
  "presentation-graphql",
+ "sqlx",
+ "tokio",
 ]
 
 [[package]]

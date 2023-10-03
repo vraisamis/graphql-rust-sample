@@ -3,6 +3,7 @@ use std::hash::Hash;
 use std::marker::PhantomData;
 use std::str::FromStr;
 
+use anyhow::Context;
 use thiserror::Error;
 use ulid::{DecodeError, Ulid};
 
@@ -56,7 +57,7 @@ impl<T: Entity> FromStr for Identifier<T> {
         let (type_name, ulid) = s
             .split_once('-')
             .ok_or(IdentifierParseError::NotContainsSeparator)?;
-        let value = Ulid::from_str(ulid)?;
+        let value = Ulid::from_str(ulid).context("ULID parse error")?;
         let expected = T::entity_type();
         if type_name == T::entity_type() {
             Ok(Self::from(value))
@@ -110,4 +111,6 @@ pub enum IdentifierParseError {
     ParseError(#[from] DecodeError),
     #[error("IDの型が違います (expected: {expected}, actual: {actual})")]
     InvalidTypePrefix { expected: String, actual: String },
+    #[error("不明なエラー: {0}")]
+    OtherError(#[from] anyhow::Error),
 }
