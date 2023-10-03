@@ -6,6 +6,7 @@ pub use query::Module as QueryModule;
 use anyhow::Result;
 use shaku::{Component, Interface};
 use sqlx::{postgres::PgPoolOptions, PgPool};
+use std::fmt::Debug;
 
 pub struct Configuration {
     max_connections: u32,
@@ -22,6 +23,15 @@ impl Configuration {
     }
 }
 
+impl Configuration {
+    pub fn new(max_connections: u32, uri: String) -> Self {
+        Self {
+            max_connections,
+            uri,
+        }
+    }
+}
+
 // TODO: injectionにする
 impl Default for Configuration {
     fn default() -> Self {
@@ -32,11 +42,11 @@ impl Default for Configuration {
     }
 }
 
-pub trait Pool: Interface {
+pub trait Pool: Interface + Debug {
     fn pool(&self) -> &PgPool;
 }
 
-#[derive(Component)]
+#[derive(Debug, Clone, Component)]
 #[shaku(interface = Pool)]
 pub struct PgPoolImpl {
     pool: PgPool,

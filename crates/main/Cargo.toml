@@ -6,14 +6,12 @@ edition = "2021"
 
 [dependencies]
 anyhow.workspace = true
-tracing.workspace = true
+tokio.workspace = true
 tracing-subscriber.workspace = true
+tracing.workspace = true
 
 # layer paths ----------------
 presentation-axum.workspace = true
 infrastructure-rdb.workspace = true
 
 
-[dependencies.tokio]
-version = "1.29.1"
-features = ["macros", "rt-multi-thread"]

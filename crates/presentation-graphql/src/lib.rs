@@ -6,11 +6,14 @@ mod validator;
 
 use async_graphql::{
     dataloader::DataLoader, extensions::Logger, http::GraphiQLSource, EmptyMutation,
-    EmptySubscription, Request, Response, Schema,
+    EmptySubscription, Request, Response, Schema, SchemaBuilder,
 };
 use futures_util::future::BoxFuture;
 use model::QueryRoot as Query;
 pub use provides::Modules;
+
+type SchemaType = Schema<Query, EmptyMutation, EmptySubscription>;
+type SchemaBuilderType = SchemaBuilder<Query, EmptyMutation, EmptySubscription>;
 
 #[derive(Clone)]
 pub struct GraphQL {
@@ -28,13 +31,18 @@ impl GraphQL {
     where
         S: Spawner<R>,
     {
-        let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
-            // NOTE: Modulesをdataに持っていることはContextからは見られないけど、諦めた方がよさそう
-            .data(DataLoader::new(m, spawner))
-            .extension(Logger)
-            .finish();
+        let schema = schema_with(|s| {
+            s
+                // NOTE: Modulesをdataに持っていることはContextからは見られないけど、諦めた方がよさそう
+                .data(DataLoader::new(m, spawner))
+                .extension(Logger)
+        });
 
         Self { schema }
+    }
+
+    pub fn sdl() -> String {
+        schema().sdl()
     }
 
     pub fn graphiql(endpoint: &str) -> String {
@@ -44,4 +52,19 @@ impl GraphQL {
     pub async fn execute(&self, request: Request) -> Response {
         self.schema.execute(request).await
     }
+}
+
+fn schema_builder() -> SchemaBuilderType {
+    Schema::build(Query, EmptyMutation, EmptySubscription)
+}
+
+fn schema() -> SchemaType {
+    schema_builder().finish()
+}
+
+fn schema_with<F>(f: F) -> SchemaType
+where
+    F: FnOnce(SchemaBuilderType) -> SchemaBuilderType,
+{
+    f(schema_builder()).finish()
 }

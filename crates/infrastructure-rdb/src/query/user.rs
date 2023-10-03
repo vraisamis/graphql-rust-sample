@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
-use crate::sample;
+use crate::{sample, Pool};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use domain_kanban::user::UserId;
@@ -9,7 +9,10 @@ use shaku::Provider;
 
 #[derive(Debug, Clone, Provider)]
 #[shaku(interface = UsersQuery)]
-pub struct UsersQueryImpl;
+pub struct UsersQueryImpl {
+    #[shaku(inject)]
+    pool: Arc<dyn Pool>,
+}
 
 fn to_view(u: sample::User) -> UserView {
     UserView {
