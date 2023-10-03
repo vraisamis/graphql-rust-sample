@@ -3,4 +3,3 @@ CREATE TABLE users (
     name VARCHAR NOT NULL,
     email VARCHAR UNIQUE NOT NULL
 );
-
