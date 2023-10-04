@@ -960,6 +960,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "domain-kanban",
+ "itertools",
  "query-resolver",
  "shaku",
  "sqlx",
