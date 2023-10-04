@@ -16,19 +16,6 @@ pub struct UsersQueryImpl {
     pool: Arc<dyn Pool>,
 }
 
-fn to_view(u: sample::User) -> UserView {
-    UserView {
-        id: u.id.to_string(),
-        name: u.name,
-        email: u.email,
-        owned_board_ids: u
-            .owned_board_ids
-            .into_iter()
-            .map(|i| i.to_string())
-            .collect(),
-    }
-}
-
 #[async_trait]
 impl UsersQuery for UsersQueryImpl {
     async fn find_by_id(&self, id: &UserId) -> Result<UserView> {
@@ -102,24 +89,66 @@ impl UsersQuery for UsersQueryImpl {
 
         let result = users
             .into_iter()
-            .map(|u| {
-                // TODO
-                let key = UserId::from_str(&u.id).unwrap();
-                let owned_board_ids = owned_board_map.remove(&u.id).unwrap_or_else(|| vec![]);
-                let value = UserView {
-                    id: u.id,
-                    name: u.name,
-                    email: u.email,
-                    owned_board_ids,
-                };
-                (key, value)
-            })
+            .map(|u| to_view_kv(u.id, u.name, u.email, &mut owned_board_map))
             .collect();
         Ok(result)
     }
     async fn all(&self) -> Result<Vec<UserView>> {
-        let data = sample::data();
-        let result = data.users.clone().into_iter().map(to_view).collect();
+        let pool = self.pool.pool();
+        let executor = pool;
+
+        let users = query!(
+            r#"
+            select u.id, u.name, u.email
+            from users u
+            "#
+        )
+        .fetch_all(executor)
+        .await?;
+
+        let owned_board_ids: Vec<_> = query!(
+            r#"
+                select user_id, board_id
+                from user_board_relations
+            "#
+        )
+        .fetch_all(executor)
+        .await?;
+
+        let mut owned_board_map: HashMap<_, _> = owned_board_ids
+            .into_iter()
+            .map(|r| (r.user_id, r.board_id))
+            .into_group_map();
+
+        let result = users
+            .into_iter()
+            .map(|u| to_view(u.id, u.name, u.email, &mut owned_board_map))
+            .collect();
         Ok(result)
     }
+}
+
+fn to_view(
+    id: String,
+    name: String,
+    email: String,
+    owned_board_map: &mut HashMap<String, Vec<String>>,
+) -> UserView {
+    let owned_board_ids = owned_board_map.remove(&id).unwrap_or_else(|| vec![]);
+    UserView {
+        id,
+        name,
+        email,
+        owned_board_ids,
+    }
+}
+
+fn to_view_kv(
+    id: String,
+    name: String,
+    email: String,
+    owned_board_map: &mut HashMap<String, Vec<String>>,
+) -> (UserId, UserView) {
+    let key = UserId::from_str(&id).unwrap();
+    (key, to_view(id, name, email, owned_board_map))
 }
