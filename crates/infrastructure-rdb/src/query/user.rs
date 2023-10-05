@@ -1,6 +1,5 @@
 use std::{collections::HashMap, str::FromStr, sync::Arc};
 
-use crate::{sample, Pool};
 use anyhow::Result;
 use async_trait::async_trait;
 use domain_kanban::user::UserId;
@@ -8,6 +7,8 @@ use itertools::Itertools;
 use query_resolver::{UserView, UsersQuery};
 use shaku::Provider;
 use sqlx::query;
+
+use crate::Pool;
 
 #[derive(Debug, Clone, Provider)]
 #[shaku(interface = UsersQuery)]
@@ -55,6 +56,7 @@ impl UsersQuery for UsersQueryImpl {
 
         Ok(result)
     }
+
     async fn list_by_ids(&self, ids: &[UserId]) -> Result<HashMap<UserId, UserView>> {
         let pool = self.pool.pool();
         let executor = pool;
@@ -149,6 +151,6 @@ fn to_view_kv(
     email: String,
     owned_board_map: &mut HashMap<String, Vec<String>>,
 ) -> (UserId, UserView) {
-    let key = UserId::from_str(&id).unwrap();
+    let key = FromStr::from_str(&id).unwrap();
     (key, to_view(id, name, email, owned_board_map))
 }
