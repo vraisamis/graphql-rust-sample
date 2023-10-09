@@ -8,7 +8,8 @@ cargo install sqlx-cli
 
 ### environment variable
 ```
-cargo run --package scripts --bin gen_schema
+# for local
+DATABASE_URL="postgres://gql:postgres@localhost:60003/gql_sample"
 ```
 
 ### docker
@@ -24,7 +25,7 @@ cargo run
 access `localhost:8000`
 
 
-## with watch
+### with watch
 ```
 cargo watch -x run
 ```

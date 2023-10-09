@@ -5,7 +5,7 @@ use crate::{model::Card, provides::HasProviderGql};
 use anyhow::Result;
 use async_graphql::{dataloader::Loader, Error as GqlError};
 use async_trait::async_trait;
-use futures_util::future::join_all;
+use futures_util::future::{join_all, JoinAll};
 use itertools::Itertools;
 use query_resolver::CardsQuery;
 use std::collections::HashMap;
@@ -26,16 +26,16 @@ impl Loader<(Id<Column>, usize)> for Modules {
         );
         let idmap: HashMap<_, _> = Vec::from(keys).into_iter().into_group_map();
         let card_query: Arc<dyn CardsQuery> = self.query().provide_arc_gql_result()?;
-        let futures: Vec<_> = idmap
+        let futures_iterator: Vec<_> = idmap
             .into_iter()
             .map(|(cid, us)| list_by_orders(Arc::clone(&card_query), cid, us))
             .collect();
-        let result = join_all(futures)
+        let v = JoinAll::from_iter(futures_iterator)
             .await
             .into_iter()
             .collect::<Result<Vec<_>>>()?;
-        let map = merge_all(result);
-        Ok(map)
+
+        Ok(merge_all(v))
     }
 }
 
