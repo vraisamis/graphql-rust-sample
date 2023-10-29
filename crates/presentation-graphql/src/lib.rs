@@ -1,4 +1,5 @@
 mod dataloader;
+mod extensions;
 mod model;
 mod provides;
 mod scalar;
@@ -8,6 +9,7 @@ use async_graphql::{
     dataloader::DataLoader, extensions::Logger, http::GraphiQLSource, EmptyMutation,
     EmptySubscription, Request, Response, Schema, SchemaBuilder,
 };
+use extensions::RestrictQueryAliases;
 use futures_util::future::BoxFuture;
 use model::QueryRoot as Query;
 pub use provides::Modules;
@@ -31,11 +33,15 @@ impl GraphQL {
     where
         S: Spawner<R>,
     {
-        let schema = schema_with(|s| {
+        let schema = schema_with(|mut s| {
+            if cfg!(not(debug_assertions)) {
+                s = s.disable_suggestions().disable_introspection();
+            }
             s
                 // NOTE: Modulesをdataに持っていることはContextからは見られないけど、諦めた方がよさそう
                 .data(DataLoader::new(m, spawner))
                 .extension(Logger)
+                .extension(RestrictQueryAliases::default())
         });
 
         Self { schema }
