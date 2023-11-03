@@ -1,0 +1,111 @@
+[config]
+default_to_workspace = false
+
+
+[env]
+DATABASE_URL = "postgres://gql:postgres@localhost:60003/gql_sample"
+
+
+[tasks.watch-run]
+command = "cargo"
+args = ["watch", "-x", "run"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.clean-build]
+dependencies = ["clean", "build"]
+
+[tasks.build-scripts]
+args = ["build", "--package", "scripts"]
+
+[tasks.test-all]
+command = "cargo"
+args = ["test", "--workspace"]
+
+[tasks.clean-test]
+dependencies = ["clean", "test"]
+
+[tasks.deps]
+script_runner = "@shell"
+script = '''
+if sudo service docker status; then
+  :
+else
+  sudo service docker start
+fi
+
+CNT=$(docker ps | tail +2 | wc -l)
+if [ $CNT -eq 0 ]; then
+  docker compose up -d
+fi
+'''
+
+[tasks.deps-refresh]
+script_runner = "@shell"
+script = '''
+sudo service docker start || :
+docker compose down
+docker compose up -d
+'''
+
+
+# script
+[tasks.script-base]
+private = true
+dependencies = ["build-scripts"]
+script_runner = "@shell"
+script = '''
+cargo run --package scripts --bin ${SCRIPT_ARGS}
+'''
+
+[tasks.gen-schema]
+extend = "script-base"
+env = { SCRIPT_ARGS = "gen_schema" }
+
+# migrate
+[tasks.migrate-base]
+private = true
+install_crate = "sqlx-cli"
+script_runner = "@shell"
+script = '''
+cd crates/migrate
+sqlx migrate ${MIGRATE_ARGS}
+'''
+
+# how to create subcommand
+# SEE: README
+[tasks.subcommand]
+private = true
+script = '''
+#!@duckscript
+cm_run_task ${SUBCOMMAND_PREFIX}_${1}
+'''
+
+[tasks.script]
+extend = "subcommand"
+private = false
+env = { SUBCOMMAND_PREFIX = "script" }
+
+[tasks.script_schema]
+dependencies = ["gen-schema"]
+
+[tasks.script_sample]
+extend = "script-base"
+dependencies = ["migrate_run"]
+env = { SCRIPT_ARGS = "sample_data" }
+
+[tasks.migrate]
+extend = "subcommand"
+private = false
+dependencies = ["deps"]
+env = { SUBCOMMAND_PREFIX = "migrate" }
+
+[tasks.migrate_run]
+extend = "migrate-base"
+env = { MIGRATE_ARGS = "run" }
+
+[tasks.migrate_list]
+extend = "migrate-base"
+env = { MIGRATE_ARGS = "info" }
