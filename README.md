@@ -3,18 +3,12 @@
 ## requirements
 ### install commands
 ```
-cargo install sqlx-cli
-```
-
-### environment variable
-```
-# for local
-DATABASE_URL="postgres://gql:postgres@localhost:60003/gql_sample"
+cargo install --force cargo-make
 ```
 
 ### docker
 ```
-docker compose up -d
+cargo make deps
 ```
 
 ## run
@@ -27,16 +21,16 @@ access `localhost:8000`
 
 ### with watch
 ```
-cargo watch -x run
+cargo make watch-run
 ```
 
 
 ## migrate
 ```
-# add
-sqlx migrate add "create table users"
+# list
+cargo make migrate list
 # run
-sqlx migrate run
+cargo make migrate run
 ```
 
 SEE: https://github.com/launchbadge/sqlx/blob/main/sqlx-cli/README.md
@@ -44,9 +38,9 @@ SEE: https://github.com/launchbadge/sqlx/blob/main/sqlx-cli/README.md
 ## scripts
 ```
 # graphql shcema generation
-cargo run --package scripts --bin gen_schema
+cargo make script schema
 # add data
-cargo run --package scripts --bin sample_data
+cargo make script sample
 ```
 
 
