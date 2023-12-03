@@ -6,6 +6,8 @@ edition = "2021"
 
 [dependencies]
 anyhow.workspace = true
+async-trait.workspace = true
+shaku.workspace = true
 thiserror.workspace = true
 
 # layer paths ----------------

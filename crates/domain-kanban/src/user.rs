@@ -1,3 +1,5 @@
+use async_trait::async_trait;
+use shaku::Interface;
 use domain_util::{Entity, Identifier, InvariantError, InvariantResult};
 use invariant_sheild::{invariant_sheild, InvariantSheild};
 
@@ -139,4 +141,14 @@ mod tests {
             ))
         );
     }
+}
+
+
+/// Userモデルを保存するリポジトリのインターフェース
+#[async_trait]
+pub trait UserRepository: Interface {
+    /// Userを保存する
+    async fn save(&self, user: User) -> Result<(), String>;
+    /// UserをIDで検索する
+    async fn find_by_id(&self, id: &UserId) -> Result<User, String>;
 }
