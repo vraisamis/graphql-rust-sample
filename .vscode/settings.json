@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.server.extraEnv": {
+        "DATABASE_URL": "postgres://gql:postgres@localhost:60003/gql_sample",
+        "AWS_ENDPOINT_URL": "http://localhost:60001",
+        "AWS_ACCESS_KEY_ID": "a",
+        "AWS_SECRET_ACCESS_KEY": "b"
+    }
+}
