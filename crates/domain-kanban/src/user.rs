@@ -89,6 +89,16 @@ impl Email {
     pub fn new_unchecked(value: String) -> Self {
         Self(value)
     }
+
+    fn email_contains_atmark(&self) -> InvariantResult<()> {
+        if self.0.contains("@") {
+            Ok(())
+        } else {
+            Err(InvariantError::ViolationError(
+                "メールアドレスに「@」が含まれていません".to_string(),
+            ))
+        }
+    }
 }
 
 impl From<String> for Email {
@@ -97,19 +107,9 @@ impl From<String> for Email {
     }
 }
 
-fn email_contains_atmark(email: &Email) -> InvariantResult<()> {
-    if email.0.contains("@") {
-        Ok(())
-    } else {
-        Err(InvariantError::ViolationError(
-            "メールアドレスに「@」が含まれていません".to_string(),
-        ))
-    }
-}
-
 impl ModelInvariants for Email {
     fn invariants() -> Vec<&'static Invariant<Self>> {
-        vec![&email_contains_atmark]
+        vec![&Self::email_contains_atmark]
     }
 }
 
