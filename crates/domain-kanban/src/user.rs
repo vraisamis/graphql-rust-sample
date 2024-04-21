@@ -1,6 +1,5 @@
-use domain_util::{Entity, Identifier};
-
-use crate::todo_invariants::{Invariant, InvariantError, InvariantResult, ModelInvariants};
+use domain_util::{Entity, Identifier, InvariantError, InvariantResult};
+use invariant_sheild::{invariant_sheild, InvariantSheild};
 
 #[allow(unused)]
 #[derive(Debug)]
@@ -10,12 +9,13 @@ pub struct User {
     email: Email,
 }
 
+#[invariant_sheild(InvariantError)]
 impl User {
     pub fn new_check(
         name: InvariantResult<UserName>,
         email: InvariantResult<Email>,
     ) -> InvariantResult<Self> {
-        Self::new(name?, email?).stisfy_invariants()
+        Self::new(name?, email?).satisfy_sheilds()
     }
     pub fn new(name: UserName, email: Email) -> Self {
         let user_id = UserId::gen();
@@ -31,12 +31,6 @@ impl User {
     }
 }
 
-impl ModelInvariants for User {
-    fn invariants() -> Vec<&'static Invariant<Self>> {
-        vec![]
-    }
-}
-
 impl Entity for User {
     fn entity_type() -> &'static str {
         "user"
@@ -48,12 +42,25 @@ pub type UserId = Identifier<User>;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserName(String);
 
+#[invariant_sheild(InvariantError)]
 impl UserName {
     pub fn new(value: String) -> InvariantResult<Self> {
-        Self::new_unchecked(value).stisfy_invariants()
+        Self::new_unchecked(value).satisfy_sheilds()
     }
+
     pub fn new_unchecked(value: String) -> Self {
         Self(value)
+    }
+
+    #[sheild]
+    fn user_name_length_less_than_21(&self) -> InvariantResult<()> {
+        if self.0.len() < 21 {
+            Ok(())
+        } else {
+            Err(InvariantError::ViolationError(
+                "名前が長すぎます。20文字以内にしてください".to_owned(),
+            ))
+        }
     }
 }
 
@@ -63,33 +70,19 @@ impl From<String> for UserName {
     }
 }
 
-fn user_name_length_less_than_20(name: &UserName) -> InvariantResult<()> {
-    if name.0.len() <= 20 {
-        Ok(())
-    } else {
-        Err(InvariantError::ViolationError(
-            "名前が長すぎます。20文字以内にしてください".to_owned(),
-        ))
-    }
-}
-
-impl ModelInvariants for UserName {
-    fn invariants() -> Vec<&'static Invariant<Self>> {
-        vec![&user_name_length_less_than_20]
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Email(String);
 
+#[invariant_sheild(InvariantError)]
 impl Email {
     pub fn new(value: String) -> InvariantResult<Self> {
-        Self::new_unchecked(value).stisfy_invariants()
+        Self::new_unchecked(value).satisfy_sheilds()
     }
     pub fn new_unchecked(value: String) -> Self {
         Self(value)
     }
 
+    #[sheild]
     fn email_contains_atmark(&self) -> InvariantResult<()> {
         if self.0.contains("@") {
             Ok(())
@@ -104,12 +97,6 @@ impl Email {
 impl From<String> for Email {
     fn from(value: String) -> Self {
         Self(value)
-    }
-}
-
-impl ModelInvariants for Email {
-    fn invariants() -> Vec<&'static Invariant<Self>> {
-        vec![&Self::email_contains_atmark]
     }
 }
 
@@ -128,26 +115,23 @@ mod tests {
     }
 
     #[test]
-    fn email_ok() {
+    fn user_name_less_than_21_is_ok() {
+        let name = UserName::from("12345678901234567890".to_owned());
+        assert_eq!(name.satisfy_sheilds_ref(), Ok(&name));
+    }
+
+    #[test]
+    fn email_with_atmark_is_ok() {
         let email = Email::from("hoge@example.com".to_owned());
-        let result = email.clone().stisfy_invariants();
-        assert_eq!(result, Ok(email.clone()));
-        let result = email.stisfy_invariants_ref();
+        let result = email.satisfy_sheilds_ref();
         assert_eq!(result, Ok(&email));
     }
 
     #[test]
-    fn email_ng() {
+    fn email_without_atmark_is_ng() {
         let email = Email::from("hoge_example.com".to_owned());
-        let result = email.clone().stisfy_invariants();
-        assert_eq!(
-            result,
-            Err(InvariantError::ViolationError(
-                "メールアドレスに「@」が含まれていません".to_owned()
-            ))
-        );
 
-        let result = email.stisfy_invariants_ref();
+        let result = email.satisfy_sheilds_ref();
         assert_eq!(
             result,
             Err(InvariantError::ViolationError(

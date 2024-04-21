@@ -10,3 +10,5 @@ thiserror.workspace = true
 
 # layer paths ----------------
 domain-util.workspace = true
+
+invariant-sheild.workspace = true
