@@ -1,6 +1,7 @@
 [workspace]
-members = [ 'crates/*' ]
+members = [ 'crates/*', 'macros/*' ]
 default-members = [ 'crates/main' ]
+resolver = "2"
 
 [workspace.dependencies]
 anyhow = "1.0.72"
@@ -29,7 +30,12 @@ query-resolver = { path = "./crates/query-resolver" }
 domain-kanban = { path = "./crates/domain-kanban" }
 domain-util = { path = "./crates/domain-util" }
 
+# macro paths ----------------
+invariant-sheild = { path = "./macros/invariant-sheild" }
+invariant-sheild-types = { path = "./macros/invariant-sheild-types" }
+invariant-sheild-macros = { path = "./macros/invariant-sheild-macros" }
 
+# comprex dependencies
 [workspace.dependencies.tokio]
 version = "1.29.1"
 features = ["macros", "rt-multi-thread"]
