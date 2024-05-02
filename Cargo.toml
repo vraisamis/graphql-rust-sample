@@ -22,6 +22,7 @@ presentation-graphql = { path = "./crates/presentation-graphql" }
 
 ## infrastructure
 infrastructure-rdb = { path = "./crates/infrastructure-rdb" }
+infrastructure-dynamodb = { path = "./crates/infrastructure-dynamodb" }
 
 ## query
 query-resolver = { path = "./crates/query-resolver" }

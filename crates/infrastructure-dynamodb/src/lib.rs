@@ -1,42 +1,33 @@
-mod user;
+mod repository;
 
-use aws_config::{SdkConfig as AwsSdkConfig, BehaviorVersion};
+use aws_config::{BehaviorVersion, SdkConfig as AwsSdkConfig};
 use aws_sdk_dynamodb::Client as DynamoDbClient;
 use shaku::{Component, Interface};
-use std::{fmt::Debug, sync::Arc};
+use std::fmt::Debug;
 
-pub trait Config: Interface + Debug {
-    fn config(&self) -> &AwsSdkConfig;
+pub use repository::Module as RepositoryModule;
+
+pub async fn default_sdk_config() -> AwsSdkConfig {
+    aws_config::load_defaults(BehaviorVersion::latest()).await
 }
 
-#[derive(Debug, Clone, Component)]
-#[shaku(interface = Config)]
-pub struct SdkConfigImpl {
-    config: AwsSdkConfig,
+pub fn dynamo_db_client(config: &AwsSdkConfig) -> DynamoDbClient {
+    DynamoDbClient::new(config)
 }
 
-impl SdkConfigImpl {
-    pub async fn new() -> Self {
-        Self {
-            config: aws_config::load_defaults(BehaviorVersion::latest()).await
-        }
-    }
-}
-
-impl Config for SdkConfigImpl {
-    fn config(&self) -> &AwsSdkConfig {
-        &self.config
-    }
-}
-
-trait Client: Interface + Debug {
+pub trait Client: Interface + Debug {
     fn client(&self) -> &DynamoDbClient;
 }
 
-#[derive(Debug, Clone)]
-// #[derive(Debug, Clone, Component)]
-// #[shaku(interface = Client)]
-struct ClientImpl {
-    // #[shaku(inject)]
-    config: Arc<dyn Config>,
+#[derive(Debug, Clone, Component)]
+#[shaku(interface = Client)]
+pub struct ClientImpl {
+    client: DynamoDbClient,
 }
+
+impl Client for ClientImpl {
+    fn client(&self) -> &DynamoDbClient {
+        &self.client
+    }
+}
+

@@ -1,17 +1,17 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use aws_config::BehaviorVersion;
-use aws_sdk_dynamodb::types::AttributeValue;
-use domain_kanban::user::{User, UserId, UserName, UserRepository};
+use aws_sdk_dynamodb::{config::IntoShared, types::AttributeValue};
+use domain_kanban::user::{User, UserId, UserRepository};
 use shaku::Provider;
 
 use crate::Client;
 
 /// UserRepositoryの実装
-// #[derive(Debug, Clone, Provider)]
-// #[shaku(interface = UserRepository)]
-struct UserRepositoryImpl {
+#[derive(Debug, Clone, Provider)]
+#[shaku(interface = UserRepository)]
+pub struct UserRepositoryImpl {
+    #[shaku(inject)]
     client: Arc<dyn Client>,
 }
 
@@ -19,10 +19,8 @@ struct UserRepositoryImpl {
 #[async_trait]
 impl UserRepository for UserRepositoryImpl {
     async fn save(&self, user: User) -> Result<(), String> {
-        let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
-        let client = aws_sdk_dynamodb::Client::new(&config);
         // clientを使ってuserをusersテーブルに上書き保存する。なければ新規に追加する。
-        let request = client
+        let request = self.client.client()
             .put_item()
             .table_name("users")
             .item("id", user.user_id().to_string().to_attribute_value())
@@ -32,10 +30,8 @@ impl UserRepository for UserRepositoryImpl {
         request.send().await.map(|_| ()).map_err(|e| e.to_string())
     }
     async fn find_by_id(&self, id: &UserId) -> Result<User, String> {
-        let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
-        let client = aws_sdk_dynamodb::Client::new(&config);
         // clientを使ってidに一致するuserをusersテーブルから取得する。
-        let request = client
+        let request = self.client.client()
             .get_item()
             .table_name("users")
             .key("id", id.to_string().to_attribute_value());

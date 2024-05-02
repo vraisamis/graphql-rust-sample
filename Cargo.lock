@@ -1522,6 +1522,7 @@ name = "main"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "infrastructure-dynamodb",
  "infrastructure-rdb",
  "presentation-axum",
  "tokio",
