@@ -4,6 +4,7 @@ use std::marker::PhantomData;
 use std::str::FromStr;
 
 use anyhow::Context;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use ulid::{DecodeError, Ulid};
 
@@ -99,6 +100,25 @@ impl<T: Entity> Hash for Identifier<T> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.value.hash(state);
         self._phantomdata.hash(state);
+    }
+}
+
+impl<T: Entity> Serialize for Identifier<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+impl<'de, T: Entity> Deserialize<'de> for Identifier<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let id = s.parse().map_err(serde::de::Error::custom)?;
+        Ok(id)
     }
 }
 

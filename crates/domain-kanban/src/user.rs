@@ -1,11 +1,13 @@
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 use shaku::Interface;
 use domain_util::{Entity, Identifier, InvariantError, InvariantResult};
 use invariant_sheild::{invariant_sheild, InvariantSheild};
 
 #[allow(unused)]
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
+    #[serde(rename = "id")]
     user_id: UserId,
     name: UserName,
     email: Email,
@@ -28,8 +30,25 @@ impl User {
         }
     }
 
+    /// UserId, UserName, EmailからUserモデルを作成
+    pub fn from(user_id: UserId, name: UserName, email: Email) -> Self {
+        Self {
+            user_id,
+            name,
+            email,
+        }
+    }
+
     pub fn user_id(&self) -> &UserId {
         &self.user_id
+    }
+
+    pub fn user_name(&self) -> &UserName {
+        &self.name
+    }
+
+    pub fn email(&self) -> &Email {
+        &self.email
     }
 }
 
@@ -41,7 +60,7 @@ impl Entity for User {
 
 pub type UserId = Identifier<User>;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UserName(String);
 
 #[invariant_sheild(InvariantError)]
@@ -74,7 +93,13 @@ impl TryFrom<String> for UserName {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+impl ToString for UserName {
+    fn to_string(&self) -> String {
+        self.0.clone()
+    }
+}   
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Email(String);
 
 #[invariant_sheild(InvariantError)]
@@ -98,9 +123,9 @@ impl Email {
     }
 }
 
-impl From<String> for Email {
-    fn from(value: String) -> Self {
-        Self(value)
+impl ToString for Email {
+    fn to_string(&self) -> String {
+        self.0.clone()
     }
 }
 
@@ -136,11 +161,10 @@ mod tests {
 
     #[test]
     fn email_without_atmark_is_ng() -> InvariantResult<()> {
-        let email = Email::from("hoge_example.com".to_owned());
+        let email = Email::new("hoge_example.com".to_owned());
 
-        let result = email.satisfy_sheilds_ref();
         assert_eq!(
-            result,
+            email,
             Err(InvariantError::ViolationError(
                 "メールアドレスに「@」が含まれていません".to_owned()
             ))
