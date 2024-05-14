@@ -1,14 +1,27 @@
 [package]
 name = "domain-kanban"
 version = "0.1.0"
-edition = "2021"
+edition.workspace = true
 
 
 [dependencies]
 anyhow.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+shaku.workspace = true
 thiserror.workspace = true
 
 # layer paths ----------------
 domain-util.workspace = true
 
 invariant-sheild.workspace = true
+
+# use in dummy feature
+fake = { workspace = true, optional = true }
+rand = { workspace = true, optional = true }
+
+[dev-dependencies]
+domain-util = { workspace = true, features = ["dummy"] }
+
+[features]
+dummy = ["dep:fake", "dep:rand", "domain-util/dummy"]

@@ -1,9 +1,20 @@
+mod email;
+mod user_name;
+pub use email::*;
+pub use user_name::*;
+
+use async_trait::async_trait;
 use domain_util::{Entity, Identifier, InvariantError, InvariantResult};
 use invariant_sheild::{invariant_sheild, InvariantSheild};
+use serde::{Deserialize, Serialize};
+use shaku::Interface;
+
+pub type UserId = Identifier<User>;
 
 #[allow(unused)]
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
+    #[serde(rename = "id")]
     user_id: UserId,
     name: UserName,
     email: Email,
@@ -11,13 +22,10 @@ pub struct User {
 
 #[invariant_sheild(InvariantError)]
 impl User {
-    pub fn new_check(
-        name: InvariantResult<UserName>,
-        email: InvariantResult<Email>,
-    ) -> InvariantResult<Self> {
-        Self::new(name?, email?).satisfy_sheilds()
+    pub fn new(name: UserName, email: Email) -> InvariantResult<Self> {
+        Self::new_unchecked(name, email).satisfy_sheilds()
     }
-    pub fn new(name: UserName, email: Email) -> Self {
+    fn new_unchecked(name: UserName, email: Email) -> Self {
         let user_id = UserId::gen();
         Self {
             user_id,
@@ -26,8 +34,29 @@ impl User {
         }
     }
 
+    /// UserId, UserName, EmailからUserモデルを作成
+    pub fn new_with_id(user_id: UserId, name: UserName, email: Email) -> InvariantResult<Self> {
+        Self {
+            user_id,
+            name,
+            email,
+        }.satisfy_sheilds()
+    }
+
     pub fn user_id(&self) -> &UserId {
         &self.user_id
+    }
+
+    pub fn user_name(&self) -> &UserName {
+        &self.name
+    }
+
+    pub fn email(&self) -> &Email {
+        &self.email
+    }
+
+    pub fn update_name(&mut self, name: UserName) {
+        self.name = name;
     }
 }
 
@@ -37,66 +66,41 @@ impl Entity for User {
     }
 }
 
-pub type UserId = Identifier<User>;
+/// Userモデルを保存するリポジトリのインターフェース
+#[async_trait]
+pub trait UserRepository: Interface {
+    /// Userを保存する
+    async fn save(&self, user: User) -> Result<(), String>;
+    /// UserをIDで検索する
+    async fn find_by_id(&self, id: &UserId) -> Result<User, String>;
+}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UserName(String);
-
-#[invariant_sheild(InvariantError)]
-impl UserName {
-    pub fn new(value: String) -> InvariantResult<Self> {
-        Self::new_unchecked(value).satisfy_sheilds()
-    }
-
-    pub fn new_unchecked(value: String) -> Self {
-        Self(value)
-    }
-
-    #[sheild]
-    fn user_name_length_less_than_21(&self) -> InvariantResult<()> {
-        if self.0.len() < 21 {
-            Ok(())
-        } else {
-            Err(InvariantError::ViolationError(
-                "名前が長すぎます。20文字以内にしてください".to_owned(),
-            ))
+#[cfg(feature = "dummy")]
+mod dummy {
+    use super::*;
+    use fake::{Dummy, Faker};
+    
+    impl Dummy<Faker> for User {
+        fn dummy_with_rng<R: rand::Rng + ?Sized>(config: &Faker, rng: &mut R) -> Self {
+            (0..10000).filter_map(|_| {
+            let id = Identifier::<User>::dummy_with_rng(config, rng);
+            let name = UserName::dummy_with_rng(config, rng);
+            let email = Email::dummy_with_rng(config, rng);
+            Self::new_with_id(id, name, email).ok()
+            }).next().unwrap()
         }
     }
-}
+    
+    #[cfg(test)]
+    #[test]
+    fn usage() {
+        use fake::vec as fake_vec;
 
-impl From<String> for UserName {
-    fn from(value: String) -> Self {
-        Self(value)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Email(String);
-
-#[invariant_sheild(InvariantError)]
-impl Email {
-    pub fn new(value: String) -> InvariantResult<Self> {
-        Self::new_unchecked(value).satisfy_sheilds()
-    }
-    pub fn new_unchecked(value: String) -> Self {
-        Self(value)
-    }
-
-    #[sheild]
-    fn email_contains_atmark(&self) -> InvariantResult<()> {
-        if self.0.contains("@") {
-            Ok(())
-        } else {
-            Err(InvariantError::ViolationError(
-                "メールアドレスに「@」が含まれていません".to_string(),
-            ))
+        let users: Vec<User> = fake_vec![User; 3..5];
+        for (i, u) in users.into_iter().enumerate() {
+            println!("{}: {:?}", i, u);
         }
-    }
-}
 
-impl From<String> for Email {
-    fn from(value: String) -> Self {
-        Self(value)
     }
 }
 
@@ -105,38 +109,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn user_test() {
-        let name = UserName::from("Foo".to_owned());
-        let email = Email::from("hoge@example.com".to_owned());
-        let user = User::new(name, email);
+    fn user_test() -> InvariantResult<()> {
+        let name = UserName::new("Foo".to_owned())?;
+        let email = Email::new("hoge@example.com".to_owned())?;
+        let user = User::new(name, email)?;
         let user_id = user.user_id();
 
         println!("{:?}, id: {:?}", user, user_id);
-    }
-
-    #[test]
-    fn user_name_less_than_21_is_ok() {
-        let name = UserName::from("12345678901234567890".to_owned());
-        assert_eq!(name.satisfy_sheilds_ref(), Ok(&name));
-    }
-
-    #[test]
-    fn email_with_atmark_is_ok() {
-        let email = Email::from("hoge@example.com".to_owned());
-        let result = email.satisfy_sheilds_ref();
-        assert_eq!(result, Ok(&email));
-    }
-
-    #[test]
-    fn email_without_atmark_is_ng() {
-        let email = Email::from("hoge_example.com".to_owned());
-
-        let result = email.satisfy_sheilds_ref();
-        assert_eq!(
-            result,
-            Err(InvariantError::ViolationError(
-                "メールアドレスに「@」が含まれていません".to_owned()
-            ))
-        );
+        Ok(())
     }
 }

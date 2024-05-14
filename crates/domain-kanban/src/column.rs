@@ -52,6 +52,7 @@ impl Entity for Column {
 
 pub type ColumnId = Identifier<Column>;
 
+#[allow(unused)]
 pub struct ColumnTitle(String);
 
 impl ColumnTitle {
@@ -104,6 +105,7 @@ impl Entity for Card {
 
 pub type CardId = Identifier<Card>;
 
+#[allow(unused)]
 pub struct CardTitle(String);
 
 impl CardTitle {
@@ -112,6 +114,7 @@ impl CardTitle {
     }
 }
 
+#[allow(unused)]
 pub struct CardDescription(String);
 
 impl CardDescription {

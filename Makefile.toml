@@ -4,6 +4,15 @@ default_to_workspace = false
 
 [env]
 DATABASE_URL = "postgres://gql:postgres@localhost:60003/gql_sample"
+AWS_ENDPOINT_URL = "http://localhost:60001"
+AWS_ACCESS_KEY_ID = "a"
+AWS_SECRET_ACCESS_KEY = "b"
+
+[tasks.with-env]
+script_runner = "@shell"
+script = '''
+${@}
+'''
 
 
 [tasks.watch-run]
@@ -13,6 +22,10 @@ args = ["watch", "-x", "run"]
 [tasks.clean]
 command = "cargo"
 args = ["clean"]
+
+[tasks.check-all]
+command = "cargo"
+args = ["check", "--workspace", "--all-features"]
 
 [tasks.clean-build]
 dependencies = ["clean", "build"]
@@ -72,6 +85,13 @@ script_runner = "@shell"
 script = '''
 cd crates/migrate
 sqlx migrate ${MIGRATE_ARGS}
+'''
+
+# aws
+[tasks.aws]
+script_runner = "@shell"
+script = '''
+aws --endpoint-url ${AWS_ENDPOINT_URL} ${@}
 '''
 
 # how to create subcommand

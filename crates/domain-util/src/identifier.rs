@@ -4,6 +4,7 @@ use std::marker::PhantomData;
 use std::str::FromStr;
 
 use anyhow::Context;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use ulid::{DecodeError, Ulid};
 
@@ -102,6 +103,26 @@ impl<T: Entity> Hash for Identifier<T> {
     }
 }
 
+impl<T: Entity> Serialize for Identifier<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl<'de, T: Entity> Deserialize<'de> for Identifier<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let id = s.parse().map_err(serde::de::Error::custom)?;
+        Ok(id)
+    }
+}
+
 // Error
 #[derive(Debug, Error)]
 pub enum IdentifierParseError {
@@ -113,4 +134,34 @@ pub enum IdentifierParseError {
     InvalidTypePrefix { expected: String, actual: String },
     #[error("不明なエラー: {0}")]
     OtherError(#[from] anyhow::Error),
+}
+
+#[cfg(feature = "dummy")]
+mod dummy {
+    use super::*;
+    use fake::{Dummy, Faker};
+
+    impl<T: Entity> Dummy<Faker> for Identifier<T> {
+        fn dummy_with_rng<R: rand::Rng + ?Sized>(config: &Faker, rng: &mut R) -> Self {
+            Self::from(Ulid::dummy_with_rng(config, rng))
+        }
+    }
+
+    #[cfg(test)]
+    #[test]
+    fn usage() {
+        use fake::Fake;
+
+        #[allow(dead_code)]
+        struct SampleEntity(i32);
+        impl Entity for SampleEntity {
+            fn entity_type() -> &'static str {
+                "Sample"
+            }
+        }
+
+        let id: Identifier<SampleEntity> = Faker.fake();
+        println!("{}", id);
+        assert!(id.to_string().starts_with("Sample-"));
+    }
 }

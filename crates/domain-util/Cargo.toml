@@ -1,10 +1,18 @@
 [package]
 name = "domain-util"
 version = "0.1.0"
-edition = "2021"
+edition.workspace = true
 
 
 [dependencies]
 anyhow.workspace = true
+serde.workspace = true
 thiserror.workspace = true
 ulid.workspace = true
+
+# use in dummy feature
+fake = { workspace = true, optional = true }
+rand = { workspace = true, optional = true }
+
+[features]
+dummy = ["dep:fake", "dep:rand"]

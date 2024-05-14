@@ -3,17 +3,22 @@ members = [ 'crates/*', 'macros/*' ]
 default-members = [ 'crates/main' ]
 resolver = "2"
 
+[workspace.package]
+edition = "2021"
+
 [workspace.dependencies]
 anyhow = "1.0.72"
 async-trait = "0.1.72"
 futures-util = "0.3.28"
 itertools = "0.11.0"
+rand = "0.8.5"
 shaku = "0.6.1"
 sqlx = "0.7.2"
+testcontainers-modules = "0.4.2"
 thiserror = "1.0.47"
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
-ulid = "1.0.1"
+
 
 # layer paths ----------------
 ## presentation
@@ -22,6 +27,7 @@ presentation-graphql = { path = "./crates/presentation-graphql" }
 
 ## infrastructure
 infrastructure-rdb = { path = "./crates/infrastructure-rdb" }
+infrastructure-dynamodb = { path = "./crates/infrastructure-dynamodb" }
 
 ## query
 query-resolver = { path = "./crates/query-resolver" }
@@ -36,6 +42,21 @@ invariant-sheild-types = { path = "./macros/invariant-sheild-types" }
 invariant-sheild-macros = { path = "./macros/invariant-sheild-macros" }
 
 # comprex dependencies
+[workspace.dependencies.fake]
+# NOTE: feature `ulid` not released to crates.io
+# version = "2.9.3-???"
+git = "https://github.com/cksac/fake-rs.git"
+rev = "854944aefe034ddbf4a498f505194419222b423f"
+features = ["derive", "ulid"]
+
+[workspace.dependencies.serde]
+version = "1.0.200"
+features = ["derive"]
+
 [workspace.dependencies.tokio]
 version = "1.29.1"
 features = ["macros", "rt-multi-thread"]
+
+[workspace.dependencies.ulid]
+version = "1.0.1"
+features = ["serde"]
