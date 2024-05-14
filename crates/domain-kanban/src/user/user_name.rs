@@ -42,6 +42,36 @@ impl ToString for UserName {
     }
 }
 
+#[cfg(feature = "dummy")]
+mod dummy {
+    use super::*;
+    use fake::{faker::name::ja_jp::Name, Dummy, Fake, Faker};
+
+    impl Dummy<Faker> for UserName {
+        fn dummy_with_rng<R: rand::Rng + ?Sized>(_config: &Faker, rng: &mut R) -> Self {
+            let f = Name();
+            (0..1000)
+                .filter_map(|_| {
+                    let s: String = f.fake_with_rng(rng);
+                    UserName::new(s).ok()
+                })
+                .next()
+                .unwrap()
+        }
+    }
+
+    #[cfg(test)]
+    #[test]
+    fn usage() {
+        use fake::vec as fake_vec;
+
+        let names: Vec<UserName> = fake_vec![UserName; 3..5];
+        for (i, name) in names.into_iter().enumerate() {
+            println!("{}: {}", i, name.to_string());
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

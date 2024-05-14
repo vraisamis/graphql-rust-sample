@@ -34,6 +34,36 @@ impl ToString for Email {
     }
 }
 
+#[cfg(feature = "dummy")]
+mod dummy {
+    use super::*;
+    use fake::{faker::internet::en::SafeEmail, Dummy, Fake, Faker};
+
+    impl Dummy<Faker> for Email {
+        fn dummy_with_rng<R: rand::Rng + ?Sized>(_config: &Faker, rng: &mut R) -> Self {
+            let f = SafeEmail();
+            (0..1000)
+                .filter_map(|_| {
+                    let s: String = f.fake_with_rng(rng);
+                    Email::new(s).ok()
+                })
+                .next()
+                .unwrap()
+        }
+    }
+
+    #[cfg(test)]
+    #[test]
+    fn usage() {
+        use fake::vec as fake_vec;
+
+        let names: Vec<Email> = fake_vec![Email; 3..5];
+        for (i, name) in names.into_iter().enumerate() {
+            println!("{}: {}", i, name.to_string());
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -21,5 +21,8 @@ version = "4.2.14"
 features = ["aws-sdk-dynamodb+1"]
 
 [dev-dependencies]
+fake.workspace = true
 testcontainers-modules = { workspace = true, features = ["localstack"] }
 tokio.workspace = true
+
+domain-kanban = { workspace = true, features = ["dummy"] }

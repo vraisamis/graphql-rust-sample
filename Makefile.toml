@@ -23,6 +23,10 @@ args = ["watch", "-x", "run"]
 command = "cargo"
 args = ["clean"]
 
+[tasks.check-all]
+command = "cargo"
+args = ["check", "--workspace", "--all-features"]
+
 [tasks.clean-build]
 dependencies = ["clean", "build"]
 

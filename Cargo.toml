@@ -3,14 +3,17 @@ members = [ 'crates/*', 'macros/*' ]
 default-members = [ 'crates/main' ]
 resolver = "2"
 
+[workspace.package]
+edition = "2021"
+
 [workspace.dependencies]
 anyhow = "1.0.72"
 async-trait = "0.1.72"
 futures-util = "0.3.28"
 itertools = "0.11.0"
+rand = "0.8.5"
 shaku = "0.6.1"
 sqlx = "0.7.2"
-# testcontainers = "0.16.7"
 testcontainers-modules = "0.4.2"
 thiserror = "1.0.47"
 tracing = "0.1.37"
@@ -39,6 +42,13 @@ invariant-sheild-types = { path = "./macros/invariant-sheild-types" }
 invariant-sheild-macros = { path = "./macros/invariant-sheild-macros" }
 
 # comprex dependencies
+[workspace.dependencies.fake]
+# NOTE: feature `ulid` not released to crates.io
+# version = "2.9.3-???"
+git = "https://github.com/cksac/fake-rs.git"
+rev = "854944aefe034ddbf4a498f505194419222b423f"
+features = ["derive", "ulid"]
+
 [workspace.dependencies.serde]
 version = "1.0.200"
 features = ["derive"]

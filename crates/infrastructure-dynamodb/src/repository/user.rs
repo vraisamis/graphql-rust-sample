@@ -42,7 +42,8 @@ impl UserRepository for UserRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use domain_kanban::user::{Email, UserName};
+    use domain_kanban::user::UserName;
+    use fake::{Fake, Faker};
     use testcontainers_modules::{localstack::LocalStack, testcontainers::ContainerAsync};
 
     use crate::{
@@ -68,11 +69,7 @@ mod tests {
     async fn test_save_find() {
         // Arrange
         let (_c, user_repository) = arrange_repository().await;
-        let user = User::new(
-            UserName::new("test user".to_owned()).unwrap(),
-            Email::new("test@example.com".to_owned()).unwrap(),
-        )
-        .unwrap();
+        let user: User = Faker.fake();
         let user_id = user.user_id().clone();
         assert_eq!(user.user_id(), &user_id);
 
@@ -85,5 +82,32 @@ mod tests {
         assert_eq!(result.user_id(), user.user_id());
         assert_eq!(result.user_name(), user.user_name());
         assert_eq!(result.email(), user.email());
+    }
+
+    #[tokio::test]
+    async fn test_save_override() {
+        // Arrange
+        let (_c, user_repository) = arrange_repository().await;
+        let user: User = Faker.fake();
+        let user_id = user.user_id().clone();
+
+        user_repository.save(user.clone()).await.unwrap();
+
+        // Act
+        let mut new_user = user.clone();
+        let new_name: UserName = Faker.fake();
+        new_user.update_name(new_name.clone());
+
+        assert_eq!(new_user.user_id(), &user_id);
+        assert_eq!(new_user.user_name(), &new_name);
+
+        user_repository.save(new_user.clone()).await.unwrap();
+
+        let result = user_repository.find_by_id(&user.user_id()).await.unwrap();
+
+        // Assert
+        assert_eq!(result.user_id(), new_user.user_id());
+        assert_eq!(result.user_name(), new_user.user_name());
+        assert_eq!(result.email(), new_user.email());
     }
 }
